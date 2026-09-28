@@ -1,15 +1,17 @@
 resource "aws_s3_bucket" "chunks" {
   bucket = var.chunks_bucket
-  tags = { Environment = var.environment 
-  ManagedBy = "Terraform"
-  Purpose = "Loki" 
+  tags = { 
+    Environment = var.environment 
+    ManagedBy = "Terraform"
+    Purpose = "Loki" 
   }
 }
 resource "aws_s3_bucket" "ruler" {
   bucket = var.ruler_bucket
-  tags = { Environment = var.environment
-  ManagedBy = "Terraform"
-  Purpose = "Loki" 
+  tags = { 
+    Environment = var.environment
+    ManagedBy = "Terraform"
+    Purpose = "Loki" 
   }
 }
 resource "aws_s3_bucket_versioning" "chunks" { 

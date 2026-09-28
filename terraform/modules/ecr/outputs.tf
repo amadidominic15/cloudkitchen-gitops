@@ -1,13 +1,4 @@
-output "repository_urls" {
-  value = {
-    for name, repo in module.ecr :
-    name => repo.repository_url
-  }
-}
 
-output "repository_arns" {
-  value = {
-    for name, repo in module.ecr :
-    name => repo.repository_arn
-  }
+output "repository_urls" { 
+  value = { for k, v in aws_ecr_repository.ecr : k => v.repository_url } 
 }

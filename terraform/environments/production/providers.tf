@@ -6,12 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.60"
     }
-
     kubernetes = {
       source  = "hashicorp/kubernetes"
       version = "~> 2.38"
     }
-
     helm = {
       source  = "hashicorp/helm"
       version = "~> 3.0"
@@ -26,7 +24,6 @@ provider "aws" {
     tags = {
       ManagedBy   = "Terraform"
       Environment = var.environment
-      Project     = var.project_name
     }
   }
 }

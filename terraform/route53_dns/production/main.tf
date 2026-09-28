@@ -1,14 +1,3 @@
-terraform {
-  required_version = ">= 1.9.0"
-  required_providers { 
-    aws = { source = "hashicorp/aws"
-     version = "~> 6.61" 
-     } 
-  }
-}
-provider "aws" { 
-  region = var.aws_region 
-}
 data "aws_route53_zone" "main" { 
   name = var.domain_name
   private_zone = false
@@ -26,7 +15,6 @@ locals {
     argocd = "argocd.${var.domain_name}"
     grafana = "grafana.${var.domain_name}"
     prometheus = "prometheus.${var.domain_name}"
-    loki = "loki.${var.domain_name}"
   }
 }
 # Exactly one public Envoy NLB is expected for this environment.

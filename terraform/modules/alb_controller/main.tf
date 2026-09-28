@@ -58,36 +58,25 @@ resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
 
 resource "helm_release" "aws_load_balancer_controller" {
   name = "aws-load-balancer-controller"
-
   repository = "https://aws.github.io/eks-charts"
-
   chart = "aws-load-balancer-controller"
-
   namespace = "kube-system"
-
   version = "1.17.0"
-
   wait = true
-
+  wait_for_jobs = true
   timeout = 900
-
   values = [
     yamlencode({
       clusterName = var.cluster_name
-
       region = var.aws_region
-
+      replicaCount = 2
       serviceAccount = {
         create = true
-
         name = "aws-load-balancer-controller"
-
         annotations = {
           "eks.amazonaws.com/role-arn" = aws_iam_role.aws_load_balancer_controller.arn
         }
       }
-
-      replicaCount = 2
     })
   ]
 

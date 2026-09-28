@@ -1,58 +1,22 @@
 aws_region = "eu-west-2"
-
-project_name = "my-platform"
-
 environment = "production"
-
-vpc_cidr = "10.20.0.0/16"
-
-azs = [
-  "eu-west-2a",
-  "eu-west-2b",
-  "eu-west-2c"
-]
-
-public_subnets = [
-  "10.20.101.0/24",
-  "10.20.102.0/24",
-  "10.20.103.0/24"
-]
-
-private_subnets = [
-  "10.20.1.0/24",
-  "10.20.2.0/24",
-  "10.20.3.0/24"
-]
-
-kubernetes_version = "1.33"
-
-# ONLY allow your trusted public IP addresses.
-endpoint_public_access_cidrs = [
-  "YOUR_PUBLIC_IP/32"
-]
-
-admin_principal_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:role/YOUR_ADMIN_ROLE"
-
-node_instance_types = [
-  "t3.large"
-]
-
-node_min_size = 3
-
-node_max_size = 10
-
-node_desired_size = 3
-
-node_disk_size = 80
-
-ecr_repositories = [
-  "frontend",
-  "backend",
-  "users",
-  "orders",
-  "payments"
-]
-
-argocd_chart_version = "7.9.1"
-
-argocd_domain = "argocd.example.com"
+cluster_name = "production-eks"
+kubernetes_version = "1.35"
+vpc_cidr = "10.0.0.0/16"
+azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+domain_name = "example.com"
+acm_certificate_arn = "arn:aws:acm:eu-west-2:YOUR_ACCOUNT_ID:certificate/YOUR_CERTIFICATE_ID"
+github_repository = "https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git"
+node_instance_types = ["t3.large"]
+endpoint_public_access_cidrs = ["YOUR_PUBLIC_IP/32"]
+admin_principal_arn = ""
+argocd_chart_version = "10.2.2"
+loki_chunks_bucket = "YOUR_UNIQUE_LOKI_CHUNKS_BUCKET"
+loki_ruler_bucket  = "YOUR_UNIQUE_LOKI_RULER_BUCKET"
+private_subnets = "10.0.0.0/24"
+public_subnets = "10.0.32.0/24"
+ecr_repositories = ["frontend", "users", "products", "orders", "payments", "notifications"]
+server_replicas = 2
+controller_replicas = 2
+repo_server_replicas = 2
+application_set_replicas = 2
