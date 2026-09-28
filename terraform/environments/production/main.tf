@@ -1,6 +1,6 @@
 module "vpc" {
   source = "../../modules/vpc"
-  name = var.environment
+  environment = var.environment
   private_subnets = var.private_subnets
   public_subnets = var.public_subnets
   vpc_cidr = var.vpc_cidr
@@ -44,6 +44,10 @@ module "loki_s3" {
 module "argocd" {
   source = "../../modules/argocd"
   argocd_chart_version = var.argocd_chart_version
+  server_replicas = var.server_replicas
+  controller_replicas = var.controller_replicas
+  repo_server_replicas = var.repo_server_replicas
+  application_set_replicas = var.application_set_replicas
   domain_name = var.domain_name
   depends_on = [module.alb_controller, module.loki_s3]
 }
