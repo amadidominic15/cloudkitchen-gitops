@@ -8,10 +8,10 @@ Platform URLs:
 - https://argocd.example.com
 - https://grafana.example.com
 - https://prometheus.example.com
-- https://loki.example.com
+- https://alertmanager.example.com
 
 Workflows:
-1. 01-infrastructure.yml: VPC, EKS, ECR, LBC, Loki S3/IAM, Argo CD, Envoy Gateway.
+1. 01-infrastructure.yml: VPC, EKS, ECR, Loki S3/IAM, Addons, Envoy Gateway.
 2. 02-bootstrap-argocd.yml: connects to EKS and bootstraps the Argo CD project/root application.
 3. 03-wait-for-nlb.yml: waits until Envoy Gateway is programmed and its LoadBalancer Service has an NLB hostname.
 4. 04-dns.yml: discovers the NLB by tags and creates Route 53 aliases.

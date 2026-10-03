@@ -5,18 +5,14 @@ metadata:
   namespace: argocd
 spec:
   description: Platform applications
-
   sourceRepos:
     - "*"
-
   destinations:
     - namespace: "*"
       server: https://kubernetes.default.svc
-
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
-
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"

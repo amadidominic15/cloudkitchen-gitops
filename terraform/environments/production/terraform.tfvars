@@ -20,5 +20,5 @@ server_replicas = 2
 controller_replicas = 2
 repo_server_replicas = 2
 application_set_replicas = 2
-deployment_replicas = 2
 blueprint_addons_version = "1.21.1"
+replica_count = 2

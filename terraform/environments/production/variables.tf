@@ -71,6 +71,6 @@ variable "application_set_replicas" {
 variable "blueprint_addons_version" {
   type = string
 }
-variable "deployment_replicas" {
-  type    = number
+variable "replica_count" {
+  type = number
 }

@@ -1,3 +1,6 @@
+variable "aws_region" {
+  type = string
+}
 variable "argocd_chart_version" {
   type = string
 }
@@ -24,4 +27,7 @@ variable "grafana_admin_password" {
 }
 variable "blueprint_addons_version" {
   type = string
+}
+variable "replica_count" {
+  type = number
 }
