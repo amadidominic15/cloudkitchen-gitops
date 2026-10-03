@@ -15,6 +15,7 @@ locals {
     argocd = "argocd.${var.domain_name}"
     grafana = "grafana.${var.domain_name}"
     prometheus = "prometheus.${var.domain_name}"
+    alertmanager = "alertmanager.${var.domain_name}"
   }
 }
 # Exactly one public Envoy NLB is expected for this environment.

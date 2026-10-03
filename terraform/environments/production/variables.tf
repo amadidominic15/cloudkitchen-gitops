@@ -68,3 +68,9 @@ variable "repo_server_replicas" {
 variable "application_set_replicas" {
   type    = number
 }
+variable "blueprint_addons_version" {
+  type = string
+}
+variable "deployment_replicas" {
+  type    = number
+}

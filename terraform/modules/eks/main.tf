@@ -1,6 +1,7 @@
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 21.24"
+  depends_on              = [module.vpc]
   name               = var.cluster_name
   kubernetes_version  = var.kubernetes_version
   endpoint_public_access  = true

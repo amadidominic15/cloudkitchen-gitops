@@ -16,3 +16,12 @@ variable "repo_server_replicas" {
 variable "application_set_replicas" {
   type    = number
 }
+variable "environment" {
+  type = string
+}
+variable "grafana_admin_password" {
+  type = string
+}
+variable "blueprint_addons_version" {
+  type = string
+}

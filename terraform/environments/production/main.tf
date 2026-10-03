@@ -16,21 +16,14 @@ module "eks" {
   admin_principal_arn = var.admin_principal_arn
   node_instance_types = var.node_instance_types
   endpoint_public_access_cidrs = var.endpoint_public_access_cidrs
+  
 }
 module "ecr" {
   source = "../../modules/ecr"
   environment = var.environment
   repositories = var.ecr_repositories
 }
-module "aws_lbc" {
-  source = "../../modules/aws-lbc"
-  cluster_name = module.eks.cluster_name
-  region = var.aws_region
-  vpc_id = module.vpc.vpc_id
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  oidc_provider_url = module.eks.oidc_provider_url
-  depends_on = [module.eks]
-}
+
 module "loki_s3" {
   source = "../../modules/loki-s3"
   environment = var.environment
@@ -41,17 +34,14 @@ module "loki_s3" {
   oidc_provider_url = module.eks.oidc_provider_url
   depends_on = [module.eks]
 }
-module "argocd" {
-  source = "../../modules/argocd"
+module "addons" {
+  source = "../../modules/addons"
   argocd_chart_version = var.argocd_chart_version
   server_replicas = var.server_replicas
   controller_replicas = var.controller_replicas
   repo_server_replicas = var.repo_server_replicas
   application_set_replicas = var.application_set_replicas
   domain_name = var.domain_name
-  depends_on = [module.alb_controller, module.loki_s3]
+  blueprint_addons_version = var.blueprint_addons_version
 }
-module "envoy_gateway" {
-  source = "../../modules/envoy-gateway"
-  depends_on = [module.argocd, module.aws_lbc]
-}
+
