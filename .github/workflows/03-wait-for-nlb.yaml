@@ -1,0 +1,49 @@
+name: "03 - Wait for Envoy NLB"
+on:
+  workflow_run:
+    workflows: ["02-Bootstrap Argo CD"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+env:
+  AWS_REGION: eu-west-2
+  CLUSTER_NAME: production-eks
+jobs:
+  wait:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: azure/setup-kubectl@v4
+      - run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$CLUSTER_NAME"
+      - name: Wait for Envoy deployment
+        run: kubectl rollout status deployment/envoy-gateway -n envoy-gateway-system --timeout=10m
+      - name: Wait for GatewayClass
+        run: |
+          for i in {1..90}; do
+            status=$(kubectl get gatewayclass envoy -o jsonpath='{.status.conditions[?(@.type=="Accepted")].status}' 2>/dev/null || true)
+            [ "$status" = "True" ] && exit 0
+            sleep 10
+          done
+          exit 1
+      - name: Wait for Gateway
+        run: |
+          for i in {1..120}; do
+            status=$(kubectl get gateway public-gateway -n envoy-gateway-system -o jsonpath='{.status.conditions[?(@.type=="Programmed")].status}' 2>/dev/null || true)
+            [ "$status" = "True" ] && exit 0
+            sleep 10
+          done
+          exit 1
+      - name: Wait for NLB hostname
+        run: |
+          for i in {1..180}; do
+            hostname=$(kubectl get svc -n envoy-gateway-system -l gateway.envoyproxy.io/owning-gateway-name=public-gateway -o jsonpath='{.items[0].status.loadBalancer.ingress[0].hostname}' 2>/dev/null || true)
+            if [ -n "$hostname" ]; then echo "NLB=$hostname"; exit 0; fi
+            sleep 10
+          done
+          exit 1

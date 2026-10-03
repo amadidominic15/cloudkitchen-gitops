@@ -1,0 +1,40 @@
+name: "04 - Terraform DNS"
+on:
+  workflow_run:
+    workflows: ["03-Wait for Envoy NLB"]
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+env:
+  AWS_REGION: eu-west-2
+jobs:
+  dns:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        working-directory: terraform/dns/production
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive terraform/dns
+
+      - name: Terraform Validate
+        working-directory: terraform/dns/production
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: terraform/dns/production
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: terraform/dns/production
+        run: terraform apply -auto-approve tfplan

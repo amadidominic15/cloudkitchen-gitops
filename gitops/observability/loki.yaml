@@ -1,0 +1,81 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+spec:
+  project: platform
+  source:
+    repoURL: https://grafana-community.github.io/helm-charts
+    chart: loki
+    targetRevision: "18.8.0"
+    helm:
+      releaseName: loki
+      values: |
+        deploymentMode: Distributed
+        loki:
+          auth_enabled: false
+          commonConfig:
+            replication_factor: 3
+          schemaConfig:
+            configs:
+              - from: "2026-01-01"
+                store: tsdb
+                object_store: s3
+                schema: v13
+                index:
+                  prefix: loki_index_
+                  period: 24h
+          storage:
+            type: s3
+            bucketNames:
+              chunks: "YOUR_UNIQUE_LOKI_CHUNKS_BUCKET"
+              ruler: "YOUR_UNIQUE_LOKI_RULER_BUCKET"
+            s3:
+              region: eu-west-2
+          storage_config:
+            aws:
+              region: eu-west-2
+              s3forcepathstyle: false
+          limits_config:
+            retention_period: 672h
+            allow_structured_metadata: true
+            volume_enabled: true
+          pattern_ingester:
+            enabled: true
+        serviceAccount:
+          create: false
+          name: loki
+        gateway:
+          enabled: true
+          replicas: 2
+          service:
+            type: ClusterIP
+            port: 80
+        distributor: {replicas: 3}
+        ingester: {replicas: 3}
+        querier: {replicas: 3}
+        queryFrontend: {replicas: 2}
+        queryScheduler: {replicas: 2}
+        compactor: {replicas: 1}
+        indexGateway: {replicas: 2}
+        patternIngester: {replicas: 1}
+        backend: {replicas: 0}
+        read: {replicas: 0}
+        write: {replicas: 0}
+        singleBinary: {replicas: 0}
+        bloomPlanner: {replicas: 0}
+        bloomBuilder: {replicas: 0}
+        bloomGateway: {replicas: 0}
+        monitoring:
+          serviceMonitor:
+            enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: loki
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: 
+      CreateNamespace: true

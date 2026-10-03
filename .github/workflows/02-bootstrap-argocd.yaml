@@ -1,0 +1,51 @@
+name: "02 - Bootstrap Argo CD"
+
+on:
+  workflow_run:
+    workflows: ["01-Infrastructure"]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-2
+  CLUSTER_NAME: production-eks
+
+jobs:
+  bootstrap:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_TERRAFORM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: aws eks update-kubeconfig --region "$AWS_REGION" --name "$CLUSTER_NAME"
+
+      - name: Wait for Argo CD
+        run: kubectl rollout status deployment/argocd-server -n argocd --timeout=10m
+
+      - name: Bootstrap project and root application
+        env:
+          ARGOCD_GIT_REPO_URL: ${{ secrets.ARGOCD_GIT_REPO_URL }}
+        run: |
+          set -euo pipefail
+          test -n "$ARGOCD_GIT_REPO_URL"
+
+          kubectl apply -f gitops/argocd/project.yaml
+
+          sed "s|__ARGOCD_REPO_URL__|${ARGOCD_GIT_REPO_URL}|g" \
+            gitops/argocd/root-app.yaml.tftpl > /tmp/root-app.yaml
+
+          kubectl apply -f /tmp/root-app.yaml
+          kubectl get application platform-root -n argocd
