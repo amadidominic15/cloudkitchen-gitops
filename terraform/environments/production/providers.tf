@@ -1,6 +1,4 @@
 terraform {
-  required_version = "~> 1.5.7"
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -47,7 +45,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
-    command = "aws"
+    command     = "aws"
     args = [
       "eks",
       "get-token",
@@ -65,7 +63,7 @@ provider "helm" {
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
     exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
-      command = "aws"
+      command     = "aws"
       args = [
         "eks",
         "get-token",

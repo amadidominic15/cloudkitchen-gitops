@@ -15,7 +15,8 @@ output "ecr_repository_urls" {
 }
 
 output "argocd_namespace" {
-  value = module.argocd.namespace
+  description = "Namespace where Argo CD is installed."
+  value       = module.addons.namespace
 }
 
 output "kubectl_config_command" {

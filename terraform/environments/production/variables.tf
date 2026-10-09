@@ -1,14 +1,14 @@
 variable "aws_region" {
-  type = string
-  default = "us-east-1"
+  type    = string
+  default = "eu-north-1"
 }
 variable "environment" {
-  type = string
+  type    = string
   default = "production"
 }
 variable "cluster_name" {
-  type = string
-  default = "production-eks"
+  type    = string
+  default = "eks"
 }
 variable "kubernetes_version" {
   type = string
@@ -25,15 +25,15 @@ variable "public_subnets" {
 variable "azs" {
   type = list(string)
 }
-variable "domain_name" { 
-  type = string 
+variable "domain_name" {
+  type = string
 }
 variable "acm_certificate_arn" {
-  type = string
+  type      = string
   sensitive = true
 }
-variable "github_repository" { 
-  type = string 
+variable "github_repository" {
+  type = string
 }
 variable "node_instance_types" {
   type = list(string)
@@ -47,33 +47,27 @@ variable "admin_principal_arn" {
 variable "ecr_repositories" {
   type = set(string)
 }
-variable "loki_chunks_bucket" { 
-  type = string 
+variable "loki_chunks_bucket" {
+  type = string
 }
-variable "loki_ruler_bucket" { 
-  type = string 
-}
-variable "argocd_chart_version" {
+variable "loki_ruler_bucket" {
   type = string
 }
 variable "server_replicas" {
-  type    = number
+  type = number
 }
 variable "controller_replicas" {
-  type    = number
+  type = number
 }
 variable "repo_server_replicas" {
-  type    = number
+  type = number
 }
 variable "application_set_replicas" {
-  type    = number
-}
-variable "blueprint_addons_version" {
-  type = string
+  type = number
 }
 variable "replica_count" {
   type = number
 }
 variable "deployment_replicas" {
-  type    = number
+  type = number
 }
