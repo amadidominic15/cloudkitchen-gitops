@@ -1,14 +1,14 @@
-# EKS GitOps Platform
+# GitOps Platform
 
 Architecture:
 
 GitHub Actions -> Terraform -> EKS -> Argo CD -> Envoy Gateway -> AWS NLB -> Route 53
 
 Platform URLs:
-- https://argocd.example.com
-- https://grafana.example.com
-- https://prometheus.example.com
-- https://alertmanager.example.com
+- https://argocd.dglobaleng.com.ng
+- https://grafana.dglobaleng.com.ng
+- https://prometheus.dglobaleng.com.ng
+- https://alertmanager.dglobaleng.com.ng
 
 Workflows:
 1. 01-infrastructure.yml: VPC, EKS, ECR, Loki S3/IAM, Addons, Envoy Gateway.

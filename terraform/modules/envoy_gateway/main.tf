@@ -8,7 +8,6 @@ resource "helm_release" "envoy_gateway" {
   wait = true
   wait_for_jobs = true
   timeout = 900
-  depends_on = [ module.eks_blueprint_addons ]
   values = [
     yamlencode({
       deployment = {

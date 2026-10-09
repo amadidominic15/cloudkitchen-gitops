@@ -29,13 +29,13 @@ spec:
           storage:
             type: s3
             bucketNames:
-              chunks: "YOUR_UNIQUE_LOKI_CHUNKS_BUCKET"
-              ruler: "YOUR_UNIQUE_LOKI_RULER_BUCKET"
+              chunks: "cloudkitchen-gitops-chunks"
+              ruler: "cloudkitchen-gitops-ruler"
             s3:
-              region: eu-west-2
+              region: us-east-1
           storage_config:
             aws:
-              region: eu-west-2
+              region: us-east-1
               s3forcepathstyle: false
           limits_config:
             retention_period: 672h

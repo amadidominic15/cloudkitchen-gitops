@@ -1,6 +1,6 @@
 variable "aws_region" {
   type = string
-  default = "eu-west-2"
+  default = "us-east-1"
 }
 variable "environment" {
   type = string
@@ -73,4 +73,7 @@ variable "blueprint_addons_version" {
 }
 variable "replica_count" {
   type = number
+}
+variable "deployment_replicas" {
+  type    = number
 }
