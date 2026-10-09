@@ -1,11 +1,11 @@
-aws_region = "eu-west-2"
+aws_region = "eu-north-1"
 environment = "production"
-cluster_name = "production-eks"
+cluster_name = "eks"
 kubernetes_version = "1.35"
 vpc_cidr = "10.0.0.0/16"
-azs = ["eu-west-2a", "eu-west-2b", "eu-west-2c"]
+azs = ["eu-north-1a", "eu-north-1b", "eu-north-1c"]
 domain_name = "dglobaleng.com.ng"
-acm_certificate_arn = "arn:aws:acm:eu-west-2:YOUR_ACCOUNT_ID:certificate/YOUR_CERTIFICATE_ID"
+acm_certificate_arn = "arn:aws:acm:eu-north-1:YOUR_ACCOUNT_ID:certificate/YOUR_CERTIFICATE_ID"
 github_repository = "https://github.com/amadidominic15/cloudkitchen-gitops.git"
 node_instance_types = ["c7i-flex.large"]
 endpoint_public_access_cidrs = ["YOUR_PUBLIC_IP/32"]
