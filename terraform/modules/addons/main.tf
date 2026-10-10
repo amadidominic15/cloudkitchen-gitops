@@ -1,10 +1,10 @@
 module "eks_blueprint_addons" {
   source  = "aws-ia/eks-blueprints-addons/aws"
-  version = var.blueprint_addons_version
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  cluster_version   = module.eks.cluster_version
-  oidc_provider_arn = module.eks.oidc_provider_arn
+  version = "~> 1.24.0"
+  cluster_name      = var.cluster_name
+  cluster_endpoint  = var.cluster_endpoint
+  cluster_version   = var.cluster_version
+  oidc_provider_arn = var.oidc_provider_arn
   enable_aws_load_balancer_controller = true
   enable_argocd                        = true
 
@@ -13,12 +13,12 @@ module "eks_blueprint_addons" {
     chart_version = "1.13.4"
     repository    = "https://aws.github.io/eks-charts"
     namespace     = "kube-system"
-
+    create_namespace = true
     values = [
       yamlencode({
-        clusterName = module.eks.cluster_name
+        clusterName = var.cluster_name
         region      = var.aws_region
-        vpcId       = module.vpc.vpc_id
+        vpcId       = var.vpc_id
 
         replicaCount = var.replica_count
         resources = {
