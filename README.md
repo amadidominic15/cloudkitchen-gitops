@@ -24,118 +24,9 @@ production-style monitoring/logging/security.
 - **React frontend** SPA served by nginx.
 - **Sync** comms over REST, **async** comms over NATS JetStream events.
 - Backed by **PostgreSQL**, **Redis**, and **NATS (JetStream)**.
-- Shipped to **EKS** (`us-east-1`) **or GKE** (`us-central1`) through **GitHub Actions → ECR / GAR → ArgoCD**.
+- Shipped to **EKS** (`eu-north-1`) through **GitHub Actions → ECR  → ArgoCD**.
 
-## Architecture
 
-```mermaid
-flowchart TB
-    %% ───────── Deploy chain (top) ─────────
-    dev([Developer])
-    gh[(GitHub Repo<br/>code + Helm chart)]
-    ci[GitHub Actions<br/>build · Trivy · push]
-    reg[(Container Registry<br/>ECR / GAR)]
-    tf[Terraform<br/>VPC + cluster + registry + IAM]
-
-    dev -->|git push| gh
-    gh -->|trigger| ci
-    ci -->|push images| reg
-    ci -.->|bump image tags| gh
-
-    %% ───────── External actors ─────────
-    user([Browser / Mobile])
-    le[("Let's Encrypt ACME")]
-
-    %% ───────── Kubernetes cluster ─────────
-    subgraph cluster["Kubernetes cluster - EKS / GKE"]
-        direction TB
-
-        argo[ArgoCD<br/>App-of-Apps · renders Helm chart]
-
-        subgraph platform["Platform - ingress + TLS"]
-            traefik[Traefik Ingress<br/>:80 / :443]
-            cm[cert-manager]
-        end
-
-        subgraph ck["cloudkitchen namespace"]
-            fe[React Frontend]
-            svcs["8 Go microservices on :8080<br/>auth · user · restaurant · menu<br/>order · payment · delivery · notification"]
-            pg[(PostgreSQL)]
-            redis[(Redis)]
-            mq{{"NATS (JetStream)"}}
-        end
-
-        subgraph obs["Observability + Logging"]
-            prom["Prometheus + Grafana<br/>+ Alertmanager"]
-            loki["Loki + Promtail"]
-        end
-
-        %% GitOps sync — ArgoCD reconciles every layer from Git
-        argo -.->|syncs| platform
-        argo -.->|syncs| ck
-        argo -.->|syncs| obs
-
-        %% Runtime data plane
-        traefik --> fe
-        traefik --> svcs
-        svcs --> pg
-        svcs --> redis
-        svcs <--> mq
-        cm -->|TLS Secret| traefik
-
-        %% Observability fan-in
-        prom -.->|scrape /metrics| svcs
-        loki -.->|tail pod logs| svcs
-    end
-
-    %% ───────── External wiring ─────────
-    tf -.->|creates| cluster
-    gh -.->|polls / webhook| argo
-    reg -.->|kubelet pulls| ck
-
-    user -->|HTTPS| traefik
-    cm <-.->|HTTP-01 challenge| le
-
-    %% ───────── Colour palette ─────────
-    classDef external  fill:#fef3c7,stroke:#92400e,color:#1f2937,stroke-width:2px
-    classDef cisrc     fill:#dbeafe,stroke:#1e40af,color:#1f2937,stroke-width:2px
-    classDef gitops    fill:#ede9fe,stroke:#6d28d9,color:#1f2937,stroke-width:2px
-    classDef ingress   fill:#ffedd5,stroke:#c2410c,color:#1f2937,stroke-width:2px
-    classDef app       fill:#d1fae5,stroke:#065f46,color:#1f2937,stroke-width:2px
-    classDef datastore fill:#fce7f3,stroke:#9d174d,color:#1f2937,stroke-width:2px
-    classDef obs       fill:#cffafe,stroke:#0e7490,color:#1f2937,stroke-width:2px
-
-    class dev,user,le external
-    class gh,ci,reg,tf cisrc
-    class argo gitops
-    class traefik,cm ingress
-    class fe,svcs app
-    class pg,redis,mq datastore
-    class prom,loki obs
-```
-
-**Legend** — each colour groups one architectural concern:
-
-| Colour | Category | Components |
-|---|---|---|
-| 🟡 Amber  | External actors           | Developer, end-user Browser, Let's Encrypt |
-| 🔵 Blue   | Source / CI / Infra       | GitHub Repo, GitHub Actions, Container Registry, Terraform |
-| 🟣 Purple | GitOps controller         | ArgoCD |
-| 🟠 Orange | Ingress + TLS             | Traefik, cert-manager |
-| 🟢 Green  | Application               | React frontend, 8 Go microservices |
-| 🩷 Pink   | Data stores               | PostgreSQL, Redis, NATS JetStream |
-| 🔷 Cyan   | Observability + Logging   | Prometheus + Grafana + Alertmanager, Loki + Promtail |
-
-- **Infrastructure (Terraform).** One `terraform apply` provisions the VPC, Kubernetes cluster (GKE or EKS), container registry (Artifact Registry or ECR), and IAM — see `gcp-terraform/` and `aws-terraform/`.
-- **CI (GitHub Actions).** On every push to `main`: build all 9 Docker images in parallel, Trivy-scan them, push to the registry, and commit the new image tags back to `helm/cloudkitchen/values.yaml`.
-- **CD (ArgoCD + Helm).** ArgoCD watches the repo, renders the umbrella Helm chart with the new tags, and reconciles every platform App via the **App-of-Apps** pattern — the application, the ingress layer, the monitoring stack, and the logging stack.
-- **Ingress + TLS (Traefik + cert-manager).** Traefik serves traffic on `:80` / `:443`. cert-manager auto-renews a Let's Encrypt TLS certificate via the HTTP-01 challenge (renews every ~75 days).
-- **Data plane.** React frontend at `/`; 8 Go services under `/api/*` listening on `:8080`. **PostgreSQL** is the system of record; **Redis** handles sessions/caching; **NATS JetStream** is the async event bus.
-- **Observability.** Prometheus scrapes `/metrics` from every pod; Promtail tails container logs into Loki; Grafana queries both; Alertmanager handles fired alerts.
-
-See [`docs/architecture/PHASE-1.md`](docs/architecture/PHASE-1.md) for the full design — event catalog, detailed CI/CD and GitOps diagrams, and the security baseline.
-
-## Tech stack
 
 | Layer            | Technology |
 |------------------|------------|
@@ -145,8 +36,8 @@ See [`docs/architecture/PHASE-1.md`](docs/architecture/PHASE-1.md) for the full 
 | Cache / sessions | Redis 7 |
 | Messaging        | NATS 2.10 + JetStream (event bus) |
 | Containers       | Docker (per-service Dockerfiles) |
-| Orchestration    | Kubernetes — **AWS EKS** (`us-east-1`) or **Google GKE** (`us-central1`) |
-| Ingress / TLS    | Traefik + cert-manager (Let's Encrypt) |
+| Orchestration    | Kubernetes — **AWS EKS** (`eu-nort-1`) 
+| Gateway API      | Envoy |
 | GitOps           | ArgoCD (App-of-Apps pattern) |
 | Packaging        | Helm (umbrella chart under `helm/cloudkitchen/`) |
 | IaC              | Terraform — `aws-terraform/` for AWS (EKS, ECR, IAM/IRSA), `gcp-terraform/` for GCP (GKE, AR, IAM) |
@@ -169,14 +60,12 @@ cloudkitchen-app/
 ├── notification/    # Go service — notifications
 ├── frontend/        # React SPA
 ├── helm/            # Helm chart(s)
-├── aws-terraform/   # AWS infra (VPC, EKS, ECR, IAM/IRSA) — us-east-1
-├── gcp-terraform/   # GCP infra (VPC, GKE, Artifact Registry, IAM) — us-central1
+├── terraform/   # AWS infra (VPC, EKS, ECR, IAM/IRSA) — us-east-1
 ├── argocd/          # ArgoCD Applications (App-of-Apps)
 ├── monitoring/      # Prometheus + Grafana values & dashboards
 ├── logging/         # Loki + Promtail values
-├── security/        # cert-manager, network policies, PSS, trivy, secrets
+├── security/        # acm, network policies, PSS, trivy, secrets
 ├── docker/          # docker-compose local stack
-├── scripts/         # build / seed / port-forward / kubeconfig helpers
 ├── docs/            # architecture & docs index
 ├── .github/         # GitHub Actions workflows
 └── README.md
