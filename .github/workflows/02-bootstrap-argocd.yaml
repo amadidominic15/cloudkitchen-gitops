@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: eu-west-2
-  CLUSTER_NAME: production-eks
+  AWS_REGION: eu-north-1
+  CLUSTER_NAME: eks
 
 jobs:
   bootstrap:
@@ -42,10 +42,10 @@ jobs:
           set -euo pipefail
           test -n "$ARGOCD_GIT_REPO_URL"
 
-          kubectl apply -f gitops/argocd/project.yaml
+          kubectl apply -f gitops/project.yaml
 
           sed "s|__ARGOCD_REPO_URL__|${ARGOCD_GIT_REPO_URL}|g" \
-            gitops/argocd/root-app.yaml.tftpl > /tmp/root-app.yaml
+            gitops/root-app.yaml > /tmp/root-app.yaml
 
           kubectl apply -f /tmp/root-app.yaml
           kubectl get application platform-root -n argocd

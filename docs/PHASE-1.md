@@ -10,8 +10,12 @@
 flowchart TB
     user([Browser / Mobile])
 
-    subgraph edge[Edge]
-      traefik[Traefik Ingress + TLS]
+    subgraph edge["Edge - AWS EKS"]
+      lb["AWS Load Balancer"]
+      envoy["Envoy Gateway / Envoy Proxy"] 
+      gw["Gateway API - Gateway"] 
+      routes["HTTPRoute Resources"] 
+      lb --> envoy --> gw --> routes
     end
 
     fe[React Frontend]
@@ -187,6 +191,6 @@ reconciles the cluster to that state.**
   CPU, memory, pod health, HTTP request rate, and 5xx error rate. (`monitoring/`)
 - **Logs**: Promtail tails the `cloudkitchen` namespace, parses JSON, ships to
   Loki. (`logging/`)
-- **Security**: restricted PSS, non-root containers, **workload identity** (IRSA on EKS / Workload Identity on GKE), External Secrets,
-  default-deny NetworkPolicies, Let's Encrypt TLS via cert-manager, Trivy
+- **Security**: restricted PSS, non-root containers, **workload identity** (pod identity  on EKS ), External Secrets,
+  default-deny NetworkPolicies, acm, Trivy
   scanning. (`security/`)

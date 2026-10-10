@@ -22,12 +22,10 @@ spec:
   # NOTE: Replace the placeholder repoURL with your real Git repository URL.
   # ---------------------------------------------------------------------------
   sourceRepos:
-    - https://github.com/vijaygiduthuri/cloudkitchen-app.git # <-- REPLACE with real repo URL
+    - https://github.com/amadidominic15/cloudkitchen-gitops.git # <-- REPLACE with real repo URL
     # Helm chart registries used by the platform add-on Applications:
-    - https://helm.traefik.io/traefik
-    - https://charts.jetstack.io
     - https://prometheus-community.github.io/helm-charts
-    - https://grafana.github.io/helm-charts
+    - https://grafana-community.github.io/helm-charts
 
   # ---------------------------------------------------------------------------
   # Allowed deployment destinations (cluster + namespace).
@@ -39,9 +37,9 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: monitoring
     - server: https://kubernetes.default.svc
-      namespace: logging
+      namespace: loki
     - server: https://kubernetes.default.svc
-      namespace: ingress
+      namespace: envoy-gateway-system
     - server: https://kubernetes.default.svc
       namespace: argocd
 

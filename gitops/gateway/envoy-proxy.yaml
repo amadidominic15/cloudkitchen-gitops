@@ -13,7 +13,7 @@ spec:
           service.beta.kubernetes.io/aws-load-balancer-type: "external"
           service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
           service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-west-2:123456789012:certificate/CHANGE-ME"
+          service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:eu-north-1:092620891680:certificate/23dedb1b-67b7-414e-8d2d-a521d4ed1dee"
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
           service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
           service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "http"

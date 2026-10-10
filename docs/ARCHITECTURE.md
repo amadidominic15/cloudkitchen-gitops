@@ -167,7 +167,7 @@ async** in a single order's life:
 sequenceDiagram
     autonumber
     actor Browser
-    participant T as Traefik
+    participant E as Gateway
     participant O as order-service
     participant R as Redis
     participant M as menu-service
