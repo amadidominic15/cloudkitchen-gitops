@@ -9,15 +9,15 @@
 
 # Namespace every resource is created in.
 namespace: cloudkitchen
-# Container registry that holds the service images (GCP Artifact Registry for GKE).
-imageRegistry: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry
+# Container registry that holds the service images.
+imageRegistry: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry
 # -----------------------------------------------------------------------------
 # Backend microservices (all listen on :8080, expose /healthz and /readyz)
 # -----------------------------------------------------------------------------
 authService:
   deploymentname: auth-service-deployment
   servicename: auth-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/auth-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/auth-service:2fec561
   replicas: 1
   port: 8080
   schema: auth # PostgreSQL schema this service owns
@@ -27,7 +27,7 @@ authService:
 userService:
   deploymentname: user-service-deployment
   servicename: user-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/user-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/user-service:2fec561
   replicas: 1
   port: 8080
   schema: users
@@ -37,7 +37,7 @@ userService:
 restaurantService:
   deploymentname: restaurant-service-deployment
   servicename: restaurant-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/restaurant-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/restaurant-service:2fec561
   replicas: 1
   port: 8080
   schema: restaurants
@@ -47,7 +47,7 @@ restaurantService:
 menuService:
   deploymentname: menu-service-deployment
   servicename: menu-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/menu-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/menu-service:2fec561
   replicas: 1
   port: 8080
   schema: menu
@@ -57,7 +57,7 @@ menuService:
 orderService:
   deploymentname: order-service-deployment
   servicename: order-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/order-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/order-service:2fec561
   replicas: 1
   port: 8080
   schema: orders
@@ -67,7 +67,7 @@ orderService:
 paymentService:
   deploymentname: payment-service-deployment
   servicename: payment-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/payment-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/payment-service:2fec561
   replicas: 1
   port: 8080
   schema: payments
@@ -77,7 +77,7 @@ paymentService:
 deliveryService:
   deploymentname: delivery-service-deployment
   servicename: delivery-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/delivery-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/delivery-service:2fec561
   replicas: 1
   port: 8080
   schema: delivery
@@ -87,7 +87,7 @@ deliveryService:
 notificationService:
   deploymentname: notification-service-deployment
   servicename: notification-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/notification-service:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/notification-service:2fec561
   replicas: 1
   port: 8080
   schema: notifications
@@ -100,7 +100,7 @@ notificationService:
 frontend:
   deploymentname: frontend-deployment
   servicename: frontend-service
-  image: us-central1-docker.pkg.dev/project-d31a3358-346c-40e8-bda/cloudkitchen-registry/frontend:2fec561
+  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/frontend:2fec561
   replicas: 1
   port: 8080
   hpa: frontend-autoscaler
@@ -115,7 +115,7 @@ postgres:
   image: postgres:16-alpine
   port: 5432
   storage: 10Gi
-  storageClass: standard-rwo # GKE StorageClass (provided by GCE PD CSI driver)
+  storageClass: gp3 
 redis:
   name: redis
   servicename: redis
@@ -141,21 +141,14 @@ db:
 # Ingress (Traefik) + TLS (cert-manager)
 # -----------------------------------------------------------------------------
 ingress:
+  enabled: false
+
+gateway:
   enabled: true
-  # HTTP-only vs HTTPS:
-  #   tls: false + entryPoint: web        -> first-day deploy (Phase 4), no cert needed.
-  #   tls: true  + entryPoint: websecure  -> HTTPS via cert-manager (Phase 7).
-  tls: false
-  # Production hostname (the DNS name your users / domain point at).
-  host: vijaygiduthuri.in
-  # Traefik LoadBalancer IP — kept as a second host so curl-by-IP still
-  # works for debugging even after DNS is in place. Get it with:
-  #   kubectl -n traefik get svc traefik \
-  #     -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
-  lbIP: 136.119.163.255
-  entryPoint: web
-  tlsSecretName: cloudkitchen-tls
-  clusterIssuer: letsencrypt-prod
+  name: public-gateway
+  namespace: envoy-gateway-system
+  host: cloudkitchen.dglobaleng.com
+ 
 # -----------------------------------------------------------------------------
 # Observability IngressRoutes + ServiceMonitor are NOT in this chart.
 # They're applied as plain YAML via kubectl apply — see docs/gcp/06 Steps 5+6.

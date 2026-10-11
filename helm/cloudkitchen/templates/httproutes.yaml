@@ -1,0 +1,97 @@
+{{- if .Values.gateway.enabled }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: cloudkitchen
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+    - name: {{ .Values.gateway.name }}
+      namespace: {{ .Values.gateway.namespace }}
+      sectionName: https
+
+  hostnames:
+    - {{ .Values.gateway.host | quote }}
+
+  rules:
+    # Authentication API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/auth
+      backendRefs:
+        - name: auth-service
+          port: 8080
+
+    # User API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/users
+      backendRefs:
+        - name: user-service
+          port: 8080
+
+    # Restaurant API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/restaurants
+      backendRefs:
+        - name: restaurant-service
+          port: 8080
+
+    # Menu API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/menu
+      backendRefs:
+        - name: menu-service
+          port: 8080
+
+    # Orders API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/orders
+      backendRefs:
+        - name: order-service
+          port: 8080
+
+    # Payments API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/payments
+      backendRefs:
+        - name: payment-service
+          port: 8080
+
+    # Delivery API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/delivery
+      backendRefs:
+        - name: delivery-service
+          port: 8080
+
+    # Notifications API
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/notifications
+      backendRefs:
+        - name: notification-service
+          port: 8080
+
+    # Frontend fallback
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend-service
+          port: 8080
+```

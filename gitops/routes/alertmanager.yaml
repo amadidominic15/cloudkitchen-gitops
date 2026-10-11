@@ -9,7 +9,7 @@ spec:
       namespace: envoy-gateway-system
       sectionName: https
   hostnames:
-    - alertmanager.example.com
+    - alertmanager.dglobaleng.com.ng
   rules:
     - matches:
         - path:

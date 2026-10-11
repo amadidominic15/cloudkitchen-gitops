@@ -6,7 +6,7 @@ variable "acm_certificate_arn" {
 }
 variable "envoy_gateway_version" {
   type = string
-  default = "1.9.1"
+  default = "1.9.2"
 }
 variable "deployment_replicas" {
   type    = number

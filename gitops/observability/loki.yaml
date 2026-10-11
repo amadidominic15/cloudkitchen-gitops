@@ -32,10 +32,10 @@ spec:
               chunks: "cloudkitchen-gitops-chunks"
               ruler: "cloudkitchen-gitops-ruler"
             s3:
-              region: us-east-1
+              region: eu-north-1
           storage_config:
             aws:
-              region: us-east-1
+              region: eu-north-1
               s3forcepathstyle: false
           limits_config:
             retention_period: 672h

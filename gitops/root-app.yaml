@@ -21,9 +21,9 @@ spec:
     # NOTE: Replace with your real Git repository URL.
     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git # <-- REPLACE
     targetRevision: main
-    # Directory source: ArgoCD renders every manifest under argocd/apps as a
+    # Directory source: ArgoCD renders every manifest under gitops/ as a
     # child Application (the App-of-Apps "fan out").
-    path: argocd/apps
+    path: gitops
     directory:
       recurse: true
   destination:

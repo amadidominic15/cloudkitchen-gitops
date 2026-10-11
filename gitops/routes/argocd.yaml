@@ -9,7 +9,7 @@ spec:
       namespace: envoy-gateway-system
       sectionName: https
   hostnames:
-    - argocd.example.com
+    - argocd.dglobaleng.com.ng
   rules:
     - matches:
         - path:
