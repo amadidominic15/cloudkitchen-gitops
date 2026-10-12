@@ -147,7 +147,7 @@ gateway:
   enabled: true
   name: public-gateway
   namespace: envoy-gateway-system
-  host: cloudkitchen.dglobaleng.com
+  host: cloudkitchen.dglobaleng.com.ng
  
 # -----------------------------------------------------------------------------
 # Observability IngressRoutes + ServiceMonitor are NOT in this chart.

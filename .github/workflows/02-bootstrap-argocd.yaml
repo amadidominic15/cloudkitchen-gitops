@@ -40,12 +40,7 @@ jobs:
           ARGOCD_GIT_REPO_URL: ${{ secrets.ARGOCD_GIT_REPO_URL }}
         run: |
           set -euo pipefail
-          test -n "$ARGOCD_GIT_REPO_URL"
-
+  
           kubectl apply -f gitops/project.yaml
-
-          sed "s|__ARGOCD_REPO_URL__|${ARGOCD_GIT_REPO_URL}|g" \
-            gitops/root-app.yaml > /tmp/root-app.yaml
-
-          kubectl apply -f /tmp/root-app.yaml
-          kubectl get application platform-root -n argocd
+          kubectl apply -f gitops/root-app.yaml
+          kubectl get application cloudkitchen-root -n argocd

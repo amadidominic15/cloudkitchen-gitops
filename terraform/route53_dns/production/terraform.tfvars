@@ -1,3 +1,3 @@
-aws_region = "eu-west-2"
+aws_region = "eu-north-1"
 environment = "production"
-domain_name = "example.com"
+domain_name = "dglobaleng.com.ng"
