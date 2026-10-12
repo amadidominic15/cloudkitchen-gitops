@@ -9,7 +9,7 @@ permissions:
   contents: read
 env:
   AWS_REGION: eu-west-2
-  CLUSTER_NAME: production-eks
+  CLUSTER_NAME: eks
 jobs:
   wait:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
