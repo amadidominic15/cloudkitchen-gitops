@@ -23,7 +23,7 @@ spec:
     targetRevision: main
     # Directory source: ArgoCD renders every manifest under gitops/ as a
     # child Application (the App-of-Apps "fan out").
-    path: gitops
+    path: gitops/apps
     directory:
       recurse: true
   destination:

@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: envoy-resources
+  namespace: argocd
+spec:
+  project: cloudkitchen
+  source:
+    repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
+    targetRevision: main
+    path: gitops/resources/gateway
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: envoy-gateway-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

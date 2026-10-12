@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudkitchen-routes
+  namespace: argocd
+spec:
+  project: cloudkitchen
+  source:
+    repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
+    targetRevision: main
+    path: gitops/resources/routes
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
