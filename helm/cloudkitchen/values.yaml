@@ -9,15 +9,21 @@
 
 # Namespace every resource is created in.
 namespace: cloudkitchen
+
+serviceAccount:
+  create: true
+  name: cloudkitchen-secrets-sa
 # Container registry that holds the service images.
-imageRegistry: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry
+imageRegistry: 092620891680.dkr.ecr.eu-north-1.amazonaws.com
 # -----------------------------------------------------------------------------
 # Backend microservices (all listen on :8080, expose /healthz and /readyz)
 # -----------------------------------------------------------------------------
 authService:
   deploymentname: auth-service-deployment
   servicename: auth-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/auth-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/auth-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: auth # PostgreSQL schema this service owns
@@ -27,7 +33,9 @@ authService:
 userService:
   deploymentname: user-service-deployment
   servicename: user-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/user-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/user-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: users
@@ -37,7 +45,9 @@ userService:
 restaurantService:
   deploymentname: restaurant-service-deployment
   servicename: restaurant-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/restaurant-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/restaurant-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: restaurants
@@ -47,7 +57,9 @@ restaurantService:
 menuService:
   deploymentname: menu-service-deployment
   servicename: menu-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/menu-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/menu-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: menu
@@ -57,7 +69,9 @@ menuService:
 orderService:
   deploymentname: order-service-deployment
   servicename: order-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/order-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/order-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: orders
@@ -67,7 +81,9 @@ orderService:
 paymentService:
   deploymentname: payment-service-deployment
   servicename: payment-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/payment-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/payment-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: payments
@@ -77,7 +93,9 @@ paymentService:
 deliveryService:
   deploymentname: delivery-service-deployment
   servicename: delivery-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/delivery-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/delivery-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: delivery
@@ -87,7 +105,9 @@ deliveryService:
 notificationService:
   deploymentname: notification-service-deployment
   servicename: notification-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/notification-service:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/notification-service
+    tag: 2fec561
   replicas: 1
   port: 8080
   schema: notifications
@@ -100,7 +120,9 @@ notificationService:
 frontend:
   deploymentname: frontend-deployment
   servicename: frontend-service
-  image: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-registry/frontend:2fec561
+  image: 
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/frontend
+    tag: 2fec561
   replicas: 1
   port: 8080
   hpa: frontend-autoscaler
@@ -137,9 +159,7 @@ db:
   port: "5432"
   name: cloudkitchen
   sslmode: disable
-# -----------------------------------------------------------------------------
-# Ingress (Traefik) + TLS (cert-manager)
-# -----------------------------------------------------------------------------
+
 ingress:
   enabled: false
 
@@ -159,8 +179,9 @@ gateway:
 # Secrets (DEV DEFAULTS ONLY — override per-environment / use a secrets manager)
 # -----------------------------------------------------------------------------
 secrets:
-  dbUser: cloudkitchen
-  dbPassword: cloudkitchen-dev-password
-  jwtSecret: changeme-use-a-strong-secret-in-production
+  #dbUser: cloudkitchen
+  #dbPassword: cloudkitchen-dev-password
+  #jwtSecret: changeme-use-a-strong-secret-in-production
   jwtExpiry: 24h
-  redisPassword: ""
+  secretProviderClass: cloudkitchen-secrets
+  #redisPassword: ""

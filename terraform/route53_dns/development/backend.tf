@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket  = "cloudkitchen-gitops"
-    key     = "eks/production/terraform.tfstate"
+    key     = "eks/dns/terraform.tfstate"
     region  = "eu-north-1"
     encrypt = true
   }

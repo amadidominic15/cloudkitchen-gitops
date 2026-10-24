@@ -1,21 +1,21 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cloudkitchen-routes
+  name: cloudkitchen-storage
   namespace: argocd
 spec:
-  project: cloudkitchen
+  project: default
+
   source:
     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
     targetRevision: main
-    path: gitops/resources/routes
-    directory:
-      recurse: true
+    path: gitops/resources/storage
+
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: default
+
   syncPolicy:
     automated:
-      prune: true
+      prune: false #Removed from Git, but Argo CD leaves the resource in the cluster.
       selfHeal: true
-

@@ -25,7 +25,7 @@ spec:
         fsGroup: 65532
       containers:
       - name: auth-service
-        image: {{ .Values.authService.image }}
+        image: {{ .Values.authService.image.repository }}:{{ .Values.authService.image.tag }}
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
@@ -62,4 +62,16 @@ spec:
         - configMapRef:
             name: auth-service-config
         - secretRef:
-            name: auth-service-secret
+            name: cloudkitchen-app-secrets
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
+

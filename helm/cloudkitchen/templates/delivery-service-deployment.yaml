@@ -25,7 +25,7 @@ spec:
         fsGroup: 65532
       containers:
       - name: delivery-service
-        image: {{ .Values.deliveryService.image }}
+        image: {{ .Values.deliveryService.image.repository }}:{{ .Values.deliveryService.image.tag }}
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
@@ -62,4 +62,16 @@ spec:
         - configMapRef:
             name: delivery-service-config
         - secretRef:
-            name: delivery-service-secret
+            name: cloudkitchen-app-secrets
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
+

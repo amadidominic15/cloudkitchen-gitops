@@ -94,4 +94,4 @@ spec:
       backendRefs:
         - name: frontend-service
           port: 8080
-```
+{{- end }}

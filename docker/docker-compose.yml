@@ -109,7 +109,7 @@ services:
   # ===========================================================================
   # Backend microservices (each builds from ./<service>/Dockerfile)
   # ===========================================================================
-  auth:
+  auth-service:
     <<: *service-defaults
     build: ../auth-service
     environment:
@@ -118,7 +118,7 @@ services:
     ports:
       - "8081:8080"
 
-  user:
+  user-service:
     <<: *service-defaults
     build: ../user-service
     environment:
@@ -127,7 +127,7 @@ services:
     ports:
       - "8082:8080"
 
-  restaurant:
+  restaurant-service:
     <<: *service-defaults
     build: ../restaurant-service
     environment:
@@ -136,7 +136,7 @@ services:
     ports:
       - "8083:8080"
 
-  menu:
+  menu-service:
     <<: *service-defaults
     build: ../menu-service
     environment:
@@ -146,7 +146,7 @@ services:
     ports:
       - "8084:8080"
 
-  order:
+  order-service:
     <<: *service-defaults
     build: ../order-service
     environment:
@@ -157,7 +157,7 @@ services:
     ports:
       - "8085:8080"
 
-  payment:
+  payment-service:
     <<: *service-defaults
     build: ../payment-service
     environment:
@@ -166,7 +166,7 @@ services:
     ports:
       - "8086:8080"
 
-  delivery:
+  delivery-service:
     <<: *service-defaults
     build: ../delivery-service
     environment:
@@ -175,7 +175,7 @@ services:
     ports:
       - "8087:8080"
 
-  notification:
+  notification-service:
     <<: *service-defaults
     build: ../notification-service
     environment:
@@ -198,14 +198,14 @@ services:
     # Backends have no in-container healthcheck (distroless), so wait for them to
     # have *started* — nginx resolves their names on the compose network.
     depends_on:
-      - auth
-      - user
-      - restaurant
-      - menu
-      - order
-      - payment
-      - delivery
-      - notification
+      - auth-service
+      - user-service
+      - restaurant-service
+      - menu-service
+      - order-service
+      - payment-service
+      - delivery-service
+      - notification-service
 
 networks:
   cloudkitchen:

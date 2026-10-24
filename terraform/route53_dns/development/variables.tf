@@ -1,10 +1,10 @@
 variable "aws_region" {
   type = string
-  default = "eu-west-2"
+  default = "eu-north-1"
 }
 variable "environment" {
   type = string
-  default = "production"
+  default = "dev"
 }
 variable "domain_name" { 
   type = string 

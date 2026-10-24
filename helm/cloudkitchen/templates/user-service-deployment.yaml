@@ -19,13 +19,14 @@ spec:
         prometheus.io/port: "{{ .Values.userService.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
         fsGroup: 65532
       containers:
       - name: user-service
-        image: {{ .Values.userService.image }}
+        image: {{ .Values.userService.image.repository }}:{{ .Values.userService.image.tag }}
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
@@ -62,4 +63,15 @@ spec:
         - configMapRef:
             name: user-service-config
         - secretRef:
-            name: user-service-secret
+            name: cloudkitchen-app-secrets
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}

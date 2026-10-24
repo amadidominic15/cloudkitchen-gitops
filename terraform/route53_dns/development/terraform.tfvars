@@ -1,3 +1,3 @@
 aws_region = "eu-north-1"
-environment = "production"
+environment = "dev"
 domain_name = "dglobaleng.com.ng"

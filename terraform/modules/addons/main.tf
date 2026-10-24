@@ -10,7 +10,7 @@ module "eks_blueprint_addons" {
 
   aws_load_balancer_controller = {
     chart         = "aws-load-balancer-controller"
-    chart_version = "1.13.4"
+    chart_version = "3.5.0"
     repository    = "https://aws.github.io/eks-charts"
     namespace     = "kube-system"
     create_namespace = true
@@ -41,7 +41,7 @@ module "eks_blueprint_addons" {
 
   argocd = {
     chart         = "argo-cd"
-    chart_version = "8.6.3"
+    chart_version = "10.10.3"
     repository    = "https://argoproj.github.io/argo-helm"
     namespace     = "argocd"
     create_namespace = true

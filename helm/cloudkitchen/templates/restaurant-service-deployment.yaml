@@ -19,13 +19,14 @@ spec:
         prometheus.io/port: "{{ .Values.restaurantService.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
         fsGroup: 65532
       containers:
       - name: restaurant-service
-        image: {{ .Values.restaurantService.image }}
+        image: {{ .Values.restaurantService.image.repository }}:{{ .Values.restaurantService.image.tag }}
         imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
@@ -62,4 +63,16 @@ spec:
         - configMapRef:
             name: restaurant-service-config
         - secretRef:
-            name: restaurant-service-secret
+            name: cloudkitchen-app-secrets
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
+

@@ -40,7 +40,7 @@ production-style monitoring/logging/security.
 | Gateway API      | Envoy |
 | GitOps           | ArgoCD (App-of-Apps pattern) |
 | Packaging        | Helm (umbrella chart under `helm/cloudkitchen/`) |
-| IaC              | Terraform — `aws-terraform/` for AWS (EKS, ECR, IAM/IRSA), `gcp-terraform/` for GCP (GKE, AR, IAM) |
+| IaC              | Terraform — `aws-terraform/` for AWS (EKS, ECR, IAM/pod identity) |
 | CI/CD            | GitHub Actions (matrix build, Trivy gate, registry push, values bump) |
 | Metrics          | Prometheus (kube-prometheus-stack) + Grafana |
 | Logging          | Loki + Promtail |
@@ -60,7 +60,7 @@ cloudkitchen-app/
 ├── notification/    # Go service — notifications
 ├── frontend/        # React SPA
 ├── helm/            # Helm chart(s)
-├── terraform/   # AWS infra (VPC, EKS, ECR, IAM/IRSA) — us-east-1
+├── terraform/   # AWS infra (VPC, EKS, ECR, IAM/IRSA) — eu-north-1
 ├── argocd/          # ArgoCD Applications (App-of-Apps)
 ├── monitoring/      # Prometheus + Grafana values & dashboards
 ├── logging/         # Loki + Promtail values
