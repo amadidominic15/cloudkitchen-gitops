@@ -22,7 +22,7 @@ spec:
       containers:
       - name: frontend
         image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

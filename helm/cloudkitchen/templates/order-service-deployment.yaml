@@ -26,7 +26,7 @@ spec:
       containers:
       - name: order-service
         image: {{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

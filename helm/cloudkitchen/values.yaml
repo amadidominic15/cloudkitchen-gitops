@@ -9,12 +9,10 @@
 
 # Namespace every resource is created in.
 namespace: cloudkitchen
-
+imagePullPolicy: Always
 serviceAccount:
   create: true
   name: cloudkitchen-secrets-sa
-# Container registry that holds the service images.
-imageRegistry: 092620891680.dkr.ecr.eu-north-1.amazonaws.com
 # -----------------------------------------------------------------------------
 # Backend microservices (all listen on :8080, expose /healthz and /readyz)
 # -----------------------------------------------------------------------------
@@ -22,7 +20,7 @@ authService:
   deploymentname: auth-service-deployment
   servicename: auth-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/auth-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-auth-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -34,7 +32,7 @@ userService:
   deploymentname: user-service-deployment
   servicename: user-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/user-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-user-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -46,7 +44,7 @@ restaurantService:
   deploymentname: restaurant-service-deployment
   servicename: restaurant-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/restaurant-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-restaurant-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -58,7 +56,7 @@ menuService:
   deploymentname: menu-service-deployment
   servicename: menu-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/menu-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-menu-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -70,7 +68,7 @@ orderService:
   deploymentname: order-service-deployment
   servicename: order-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/order-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-order-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -82,7 +80,7 @@ paymentService:
   deploymentname: payment-service-deployment
   servicename: payment-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/payment-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-payment-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -94,7 +92,7 @@ deliveryService:
   deploymentname: delivery-service-deployment
   servicename: delivery-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/delivery-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-delivery-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -106,7 +104,7 @@ notificationService:
   deploymentname: notification-service-deployment
   servicename: notification-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/notification-service
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-notification-service
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -121,7 +119,7 @@ frontend:
   deploymentname: frontend-deployment
   servicename: frontend-service
   image: 
-    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/frontend
+    repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-frontend
     tag: 2fec561
   replicas: 1
   port: 8080
@@ -150,7 +148,7 @@ nats:
   clientPort: 4222 # NATS client protocol
   monitorPort: 8222 # HTTP monitoring endpoint
   storage: 5Gi # JetStream file storage
-  storageClass: standard-rwo
+  storageClass: gp3
 # -----------------------------------------------------------------------------
 # Shared database connection (single DB "cloudkitchen", schema-per-service)
 # -----------------------------------------------------------------------------
@@ -159,16 +157,13 @@ db:
   port: "5432"
   name: cloudkitchen
   sslmode: disable
-
 ingress:
   enabled: false
-
 gateway:
   enabled: true
   name: public-gateway
   namespace: envoy-gateway-system
   host: cloudkitchen.dglobaleng.com.ng
- 
 # -----------------------------------------------------------------------------
 # Observability IngressRoutes + ServiceMonitor are NOT in this chart.
 # They're applied as plain YAML via kubectl apply — see docs/gcp/06 Steps 5+6.

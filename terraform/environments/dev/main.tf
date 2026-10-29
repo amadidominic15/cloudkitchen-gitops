@@ -1,9 +1,8 @@
 module "vpc" {
   source                         = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/vpc?ref=main"
-  cluster_name                   = var.cluster_name
-  environment                    = var.environment
-  project                        = var.project
-  aws_region                     = var.aws_region
+  name_prefix                    = local.name_prefix
+  project                        = var.project 
+  environment                    = var.environment 
   vpc_cidr                       = var.vpc_cidr
   azs_count                      = var.azs_count
   enable_nat_gateway             = var.enable_nat_gateway
@@ -13,18 +12,17 @@ module "vpc" {
 }
 
 module "security_group" {
-  source                = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/security-group?ref=main"
-  cluster_name          = var.cluster_name
-  environment           = var.environment
-  vpc_id                = module.vpc.vpc_id
-  vpc_cidr              = var.vpc_cidr
-  alb_security_group_id = module.security_group.alb_security_group_id
+  source            = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/security-group?ref=main"
+  name_prefix       = local.name_prefix
+  vpc_id            = module.vpc.vpc_id
+  application_ports = local.application_ports
+  alb_ingress_cidrs = ["0.0.0.0/0"]
 }
 
 module "eks" {
   source                      = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/eks?ref=main"
-  cluster_name                = var.cluster_name
-  environment                 = var.environment
+  name_prefix                 = local.name_prefix
+  project                     = var.project
   kubernetes_version          = var.kubernetes_version
   cluster_public_access_cidrs = var.cluster_public_access_cidrs
   private_subnet_ids          = module.vpc.private_subnets_ids
@@ -52,7 +50,7 @@ module "eks" {
 
 module "cluster_addons" {
   source                                 = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/cluster-addons?ref=main"
-  cluster_name                           = var.cluster_name
+  name_prefix                            = local.name_prefix
   aws_region                             = var.aws_region
   vpc_id                                 = module.vpc.vpc_id
   lb_controller_chart_version            = var.lb_controller_chart_version
@@ -70,53 +68,52 @@ module "secrets_manager" {
 
 module "iam" {
   source                          = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/iam?ref=main"
-  cluster_name                    = var.cluster_name
+  name_prefix                     = local.name_prefix
   enable_vpc_cni                  = true
   enable_ebs_csi                  = true
   enable_cloudwatch               = true
   enable_load_balancer_controller = true
   enable_external_dns             = true
   enable_loki                     = true
-  loki_bucket_arn                 = module.s3.loki_bucket_arn
-  enable_application_secrets      = true
+  loki_bucket_arn = [
+    module.s3.bucket_arns["loki_chunks"], module.s3.bucket_arns["loki_ruler"]
+  ]
+  enable_application_secrets = true
   application_secret_arns = concat(
     [for name in var.application_secret_names : module.secrets_manager.secret_arns[name]]
   )
 }
 
 module "s3" {
-  source       = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/s3?ref=main"
-  cluster_name = var.cluster_name
-  environment  = var.environment
-  enable_loki  = true
+  source      = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/s3?ref=main"
+  name_prefix = local.name_prefix
+  environment = var.environment
+  buckets = {
+    loki_chunks = {
+      bucket_name        = "${local.name_prefix}-loki-chunks-1026"
+      purpose            = "Loki chunks storage"
+      versioning_enabled = true
+      enable_encryption  = true
+      tags = {
+        Name     = "${local.name_prefix}-loki-chunks"
+        Workload = "Loki"
+      }
+    }
+    loki_ruler = {
+      bucket_name        = "${local.name_prefix}-loki-ruler-1026"
+      purpose            = "Loki ruler storage"
+      versioning_enabled = true
+      enable_encryption  = true
+      tags = {
+        Name     = "${local.name_prefix}-loki-ruler"
+        Workload = "Loki"
+      }
+    }
+  }
 }
 
 module "ecr" {
   source           = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/ecr?ref=main"
-  ecr_repositories = var.ecr_repositories
-}
-
-module "rds" {
-  source                  = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/rds?ref=main"
-  project                 = var.project
-  environment             = var.environment
-  rds_engine              = var.rds_engine
-  rds_engine_version      = var.rds_engine_version
-  rds_instance_class      = var.rds_instance_class
-  db_name                 = "application"
-  master_username         = "dbadmin"
-  port                    = 5432
-  private_subnet_ids      = module.vpc.private_subnets_ids
-  vpc_security_group_ids  = [module.security_group.rds_security_group_id]
-  allocated_storage       = 20
-  max_allocated_storage   = 100
-  multi_az                = true
-  backup_retention_period = 7
-  deletion_protection     = true
-  monitoring_interval     = 0 # Enhanced Monitoring is disabled until an IAM role is provided.
-  tags = {
-    Environment = var.environment
-    Project     = var.project
-    ManagedBy   = "Terraform"
-  }
+  project      = var.project
+  repository_names = var.repository_names
 }

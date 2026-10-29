@@ -6,11 +6,10 @@ variable "vpc_cidr" {}
 variable "enable_nat_gateway" {}
 variable "single_nat_gateway" {}
 variable "enable_vpc_endpoints" {}
-variable "cluster_name" {}
 variable "kubernetes_version" {}
 variable "cluster_public_access_cidrs" {}
 variable "admin_principal_arns" {}
-variable "ecr_repositories" {}
+variable "repository_names" {}
 variable "lb_controller_chart_version" {}
 variable "argocd_chart_version" {}
 variable "acm_certificate_arn" {}
@@ -22,6 +21,3 @@ variable "application_secret_names" {
   description = "Secret names this application's IAM role is allowed to read."
   type        = list(string)
 }
-variable "rds_engine" {}
-variable "rds_engine_version" {}
-variable "rds_instance_class" {}

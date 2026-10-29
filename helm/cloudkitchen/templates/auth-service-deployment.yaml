@@ -26,7 +26,7 @@ spec:
       containers:
       - name: auth-service
         image: {{ .Values.authService.image.repository }}:{{ .Values.authService.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

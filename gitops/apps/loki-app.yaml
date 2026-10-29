@@ -29,8 +29,8 @@ spec:
           storage:
             type: s3
             bucketNames:
-              chunks: "cloudkitchen-gitops-chunks"
-              ruler: "cloudkitchen-gitops-ruler"
+              chunks: "dev-cloudkitchen-eu-north-1-loki-chunks-1026"
+              ruler: "dev-cloudkitchen-eu-north-1-loki-ruler-1026"
             s3:
               region: eu-north-1
           storage_config:
@@ -48,7 +48,7 @@ spec:
           name: loki
         gateway:
           enabled: true
-          replicas: 2
+          replicas: 1
           service:
             type: ClusterIP
             port: 80

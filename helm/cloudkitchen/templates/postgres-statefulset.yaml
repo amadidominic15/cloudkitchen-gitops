@@ -1,3 +1,4 @@
+
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -18,62 +19,73 @@ spec:
     spec:
       serviceAccountName: {{ .Values.serviceAccount.name }}
       containers:
-      - name: postgres
-        image: {{ .Values.postgres.image }}
-        ports:
         - name: postgres
-          containerPort: {{ .Values.postgres.port }}
-        env:
-        - name: POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              name: cloudkitchen-app-secrets
-              key: DB_USER
-        - name: POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: cloudkitchen-app-secrets
-              key: DB_PASSWORD
-        - name: POSTGRES_DB
-          value: {{ .Values.db.name | quote }}
-        - name: PGDATA
-          value: /var/lib/postgresql/data/pgdata
-        volumeMounts:
-        - name: data
-          mountPath: /var/lib/postgresql/data
-        - name: secrets-store
-          mountPath: "/mnt/secrets-store"
-          readOnly: true
+          image: {{ .Values.postgres.image }}
+          ports:
+            - name: postgres
+              containerPort: {{ .Values.postgres.port }}
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudkitchen-app-secrets
+                  key: DB_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudkitchen-app-secrets
+                  key: DB_PASSWORD
+            - name: POSTGRES_DB
+              value: {{ .Values.db.name | quote }}
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: secrets-store
+              mountPath: /mnt/secrets-store
+              readOnly: true
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
       volumes:
-      - name: secrets-store
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
-        readinessProbe:
-          exec:
-            command: ["pg_isready", "-U", "{{ .Values.secrets.dbUser }}", "-d", "{{ .Values.db.name }}"]
-          initialDelaySeconds: 10
-          periodSeconds: 10
-        livenessProbe:
-          exec:
-            command: ["pg_isready", "-U", "{{ .Values.secrets.dbUser }}", "-d", "{{ .Values.db.name }}"]
-          initialDelaySeconds: 30
-          periodSeconds: 15
+        - name: secrets-store
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: {{ .Values.secrets.secretProviderClass | quote }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.postgres.storageClass }}
         resources:
           requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 512Mi
-  volumeClaimTemplates:
-  - metadata:
-      name: data
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      storageClassName: {{ .Values.postgres.storageClass }}
-      resources:
-        requests:
-          storage: {{ .Values.postgres.storage }}
+            storage: {{ .Values.postgres.storage }}

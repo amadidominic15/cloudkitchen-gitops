@@ -27,7 +27,7 @@ spec:
       containers:
       - name: restaurant-service
         image: {{ .Values.restaurantService.image.repository }}:{{ .Values.restaurantService.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

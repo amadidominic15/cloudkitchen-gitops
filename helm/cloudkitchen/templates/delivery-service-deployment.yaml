@@ -26,7 +26,7 @@ spec:
       containers:
       - name: delivery-service
         image: {{ .Values.deliveryService.image.repository }}:{{ .Values.deliveryService.image.tag }}
-        imagePullPolicy: Always
+        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

@@ -1,0 +1,312 @@
+
+name: CloudKitchen CI/CD
+
+on:
+  #push:
+    #branches: [main]
+    #paths:
+      #- "services/**"
+      #- ".github/workflows/cloudkitchen-ci.yaml"
+
+  workflow_dispatch:
+    inputs:
+      services:
+        description: "Comma-separated services, all, or auto"
+        type: string
+        required: true
+        default: auto
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudkitchen-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: eu-north-1
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.detect.outputs.matrix }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        env:
+          EVENT: ${{ github.event_name }}
+          REQUESTED: ${{ inputs.services }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+
+          ALL='["auth-service","user-service","restaurant-service","menu-service","order-service","payment-service","delivery-service","notification-service","frontend"]'
+          CHANGED=""
+
+          if [[ "$EVENT" == "workflow_dispatch" ]]; then
+            REQUESTED="${REQUESTED:-auto}"
+
+            if [[ "$REQUESTED" == "all" ]]; then
+              echo "matrix=$ALL" >> "$GITHUB_OUTPUT"
+              exit 0
+            elif [[ "$REQUESTED" != "auto" ]]; then
+              SERVICES=()
+              IFS=',' read -ra INPUT_SERVICES <<< "$REQUESTED"
+
+              for ITEM in "${INPUT_SERVICES[@]}"; do
+                S="$(echo "$ITEM" | xargs)"
+                case "$S" in
+                  auth-service|user-service|restaurant-service|menu-service|order-service|payment-service|delivery-service|notification-service|frontend)
+                    SERVICES+=("$S")
+                    ;;
+                  *)
+                    echo "Invalid service: $S"
+                    exit 1
+                    ;;
+                esac
+              done
+
+              MATRIX="$(printf '%s\n' "${SERVICES[@]}" |
+                sort -u | jq -R . | jq -sc .)"
+              echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            BASE="$(git rev-parse HEAD^ 2>/dev/null || true)"
+            [[ -n "$BASE" ]] && CHANGED="$(git diff --name-only "$BASE" HEAD)" || true
+          else
+            if [[ -z "$BEFORE" || "$BEFORE" =~ ^0+$ ]] ||
+               ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+              echo "matrix=$ALL" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+
+            CHANGED="$(git diff --name-only "$BEFORE" "$AFTER")"
+          fi
+
+          if grep -q '^\.github/workflows/cloudkitchen-ci.yaml$' <<< "$CHANGED"; then
+            echo "matrix=$ALL" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          SERVICES=()
+          for S in auth-service user-service restaurant-service menu-service \
+                   order-service payment-service delivery-service notification-service frontend; do
+            if grep -q "^services/$S/" <<< "$CHANGED"; then
+              SERVICES+=("$S")
+            fi
+          done
+
+          MATRIX="$(printf '%s\n' "${SERVICES[@]}" |
+            sed '/^$/d' | sort -u | jq -R . | jq -sc .)"
+
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+  build-test-scan-push:
+    needs: changes
+    if: needs.changes.outputs.matrix != '[]'
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      max-parallel: 9
+      matrix:
+        service: ${{ fromJSON(needs.changes.outputs.matrix) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set service paths
+        id: vars
+        env:
+          SERVICE: ${{ matrix.service }}
+        run: |
+          set -euo pipefail
+
+          SERVICE_DIR="services/$SERVICE"
+          echo "dir=$SERVICE_DIR" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+          case "$SERVICE" in
+            auth-service)         KEY=authService ;;
+            user-service)         KEY=userService ;;
+            restaurant-service)   KEY=restaurantService ;;
+            menu-service)         KEY=menuService ;;
+            order-service)        KEY=orderService ;;
+            payment-service)      KEY=paymentService ;;
+            delivery-service)     KEY=deliveryService ;;
+            notification-service) KEY=notificationService ;;
+            frontend)             KEY=frontend ;;
+          esac
+
+          echo "helm_key=$KEY" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Go
+        if: matrix.service != 'frontend'
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ steps.vars.outputs.dir }}/go.mod
+          cache: true
+          cache-dependency-path: ${{ steps.vars.outputs.dir }}/go.sum
+
+      - name: Test Go service
+        if: matrix.service != 'frontend'
+        working-directory: ${{ steps.vars.outputs.dir }}
+        run: |
+          go mod download
+          go mod verify
+          go test -race -count=1 ./...
+
+      - name: Set up Node.js
+        if: matrix.service == 'frontend'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: services/frontend/package-lock.json
+
+      - name: Build React frontend
+        if: matrix.service == 'frontend'
+        working-directory: services/frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Scan service for secrets
+        env:
+          SERVICE_DIR: ${{ steps.vars.outputs.dir }}
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo" \
+            zricethezav/gitleaks:latest \
+            dir "/repo/$SERVICE_DIR" --no-git --redact
+
+      - name: Scan source and dependencies
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ${{ steps.vars.outputs.dir }}
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ steps.vars.outputs.dir }}
+          file: ${{ steps.vars.outputs.dir }}/Dockerfile
+          load: true
+          push: false
+          tags: ${{ steps.ecr.outputs.registry }}/cloudkitchen-${{ matrix.service }}:${{ steps.vars.outputs.tag }}
+          cache-from: type=gha,scope=cloudkitchen-${{ matrix.service }}
+          cache-to: type=gha,mode=max,scope=cloudkitchen-${{ matrix.service }}
+
+      - name: Scan Docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: image
+          image-ref: ${{ steps.ecr.outputs.registry }}/cloudkitchen-${{ matrix.service }}:${{ steps.vars.outputs.tag }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - name: Push image to ECR
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/cloudkitchen-${{ matrix.service }}:${{ steps.vars.outputs.tag }}
+        run: docker push "$IMAGE"
+
+      - name: Save Helm update metadata
+        env:
+          SERVICE: ${{ matrix.service }}
+          TAG: ${{ steps.vars.outputs.tag }}
+          KEY: ${{ steps.vars.outputs.helm_key }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/helm-update"
+          printf '%s\n%s\n' "$KEY" "$TAG" \
+            > "$RUNNER_TEMP/helm-update/$SERVICE.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: helm-${{ matrix.service }}
+          path: ${{ runner.temp }}/helm-update/${{ matrix.service }}.txt
+          retention-days: 1
+
+  update-helm:
+    needs: [changes, build-test-scan-push]
+    if: always() && needs.changes.outputs.matrix != '[]' && needs.build-test-scan-push.result != 'cancelled'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: helm-*
+          path: helm-updates
+          merge-multiple: true
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Update successful service tags
+        run: |
+          set -euo pipefail
+
+          VALUES="helm/cloudkitchen/values.yaml"
+          test -f "$VALUES"
+
+          shopt -s nullglob
+          FILES=(helm-updates/*.txt)
+
+          if [[ ${#FILES[@]} -eq 0 ]]; then
+            echo "No successful images to update."
+            exit 0
+          fi
+
+          for FILE in "${FILES[@]}"; do
+            mapfile -t DATA < "$FILE"
+            KEY="${DATA[0]}"
+            TAG="${DATA[1]}"
+
+            yq -i ".[\"$KEY\"].image.tag = \"$TAG\"" "$VALUES"
+          done
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$VALUES"
+
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(gitops): update successful CloudKitchen image tags"
+            git push origin HEAD:main
+          fi
