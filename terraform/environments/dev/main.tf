@@ -1,8 +1,8 @@
 module "vpc" {
   source                         = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/vpc?ref=main"
   name_prefix                    = local.name_prefix
-  project                        = var.project 
-  environment                    = var.environment 
+  project                        = var.project
+  environment                    = var.environment
   vpc_cidr                       = var.vpc_cidr
   azs_count                      = var.azs_count
   enable_nat_gateway             = var.enable_nat_gateway
@@ -114,6 +114,6 @@ module "s3" {
 
 module "ecr" {
   source           = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/ecr?ref=main"
-  project      = var.project
+  project          = var.project
   repository_names = var.repository_names
 }
