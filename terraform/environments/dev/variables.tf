@@ -12,7 +12,6 @@ variable "admin_principal_arns" {}
 variable "repository_names" {}
 variable "lb_controller_chart_version" {}
 variable "argocd_chart_version" {}
-variable "acm_certificate_arn" {}
 variable "envoy_gateway_version" {}
 variable "deployment_replicas" {}
 variable "secrets_store_csi_driver_chart_version" {}

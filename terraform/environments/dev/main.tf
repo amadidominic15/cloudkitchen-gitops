@@ -8,15 +8,16 @@ module "vpc" {
   enable_nat_gateway             = var.enable_nat_gateway
   single_nat_gateway             = var.single_nat_gateway
   enable_vpc_endpoints           = var.enable_vpc_endpoints
-  vpc_endpoint_security_group_id = module.security_group.vpc_endpoint_security_group_id
+  vpc_endpoint_security_group_id = module.security_group.vpc_endpoints_security_group_id
 }
 
 module "security_group" {
-  source            = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/security-group?ref=main"
-  name_prefix       = local.name_prefix
-  vpc_id            = module.vpc.vpc_id
-  application_ports = local.application_ports
-  alb_ingress_cidrs = ["0.0.0.0/0"]
+  source                              = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/security-group?ref=main"
+  name_prefix                         = local.name_prefix
+  vpc_id                              = module.vpc.vpc_id
+  create_eks_security_group           = true
+  create_vpc_endpoints_security_group = true
+  vpc_endpoints_allow_eks_nodes       = true
 }
 
 module "eks" {
@@ -28,8 +29,8 @@ module "eks" {
   private_subnet_ids          = module.vpc.private_subnets_ids
   cluster_role_arn            = module.iam.eks_cluster_role_arn
   node_role_arn               = module.iam.eks_node_role_arn
-  cluster_security_group_id   = module.security_group.cluster_security_group_id
-  node_security_group_id      = module.security_group.nodes_security_group_id
+  cluster_security_group_id   = module.security_group.eks_cluster_security_group_id
+  node_security_group_id      = module.security_group.eks_nodes_security_group_id
   admin_principal_arns        = var.admin_principal_arns
   enable_pod_identity         = true
   pod_identity_role_arns      = module.iam.pod_identity_role_arns
@@ -57,7 +58,6 @@ module "cluster_addons" {
   argocd_chart_version                   = var.argocd_chart_version
   secrets_store_csi_driver_chart_version = var.secrets_store_csi_driver_chart_version
   deployment_replicas                    = var.deployment_replicas
-  acm_certificate_arn                    = var.acm_certificate_arn
   depends_on                             = [module.eks]
 }
 

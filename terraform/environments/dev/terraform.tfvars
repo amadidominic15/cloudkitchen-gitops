@@ -8,13 +8,12 @@ enable_nat_gateway                     = true
 single_nat_gateway                     = true
 enable_vpc_endpoints                   = true
 admin_principal_arns                   = ["arn:aws:iam::092620891680:user/admin"] #put the user arn of the user you want to have admin access to the cluster
-acm_certificate_arn                    = "arn:aws:acm:eu-north-1:092620891680:certificate/23dedb1b-67b7-414e-8d2d-a521d4ed1dee"
-repository_names                       = ["auth-service", "user-service", "restaurant-service", "menu-service", "order-service", "payment-service", "delivery-service", "notification-service", "frontend-service"]
+repository_names                       = ["auth-service", "user-service", "restaurant-service", "menu-service", "order-service", "payment-service", "delivery-service", "notification-service", "frontend"]
 cluster_public_access_cidrs            = ["0.0.0.0/0"] #use this to restrict access to the EKS API endpoint. For example, you can use your office IP address or VPN IP address. 
 lb_controller_chart_version            = "3.6.0"
 argocd_chart_version                   = "10.10.3"
 secrets_store_csi_driver_chart_version = "3.1.4"
 envoy_gateway_version                  = 1.9
 secrets                                = { "dev/cloudkitchen/application" = {} }
-application_secret_names               = ["production/cloudkitchen/application"]
+application_secret_names               = ["dev/cloudkitchen/application"]
 deployment_replicas                    = 2
