@@ -8,7 +8,7 @@ permissions:
   id-token: write
   contents: read
 env:
-  AWS_REGION: eu-west-2
+  AWS_REGION: eu-north-1
 jobs:
   dns:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
@@ -22,20 +22,20 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
       - name: Terraform Init
-        working-directory: terraform/dns/production
+        working-directory: terraform/dns/dev
         run: terraform init
 
       - name: Terraform Format
         run: terraform fmt -check -recursive terraform/dns
 
       - name: Terraform Validate
-        working-directory: terraform/dns/production
+        working-directory: terraform/dns/dev
         run: terraform validate
 
       - name: Terraform Plan
-        working-directory: terraform/dns/production
+        working-directory: terraform/dns/dev
         run: terraform plan -out=tfplan
 
       - name: Terraform Apply
-        working-directory: terraform/dns/production
+        working-directory: terraform/dns/dev
         run: terraform apply -auto-approve tfplan
