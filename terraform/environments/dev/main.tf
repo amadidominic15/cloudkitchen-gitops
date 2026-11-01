@@ -116,4 +116,5 @@ module "ecr" {
   source           = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/ecr?ref=main"
   project          = var.project
   repository_names = var.repository_names
+  force_delete = true
 }
