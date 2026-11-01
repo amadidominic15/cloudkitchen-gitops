@@ -19,9 +19,9 @@ serviceAccount:
 authService:
   deploymentname: auth-service-deployment
   servicename: auth-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-auth-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: auth # PostgreSQL schema this service owns
@@ -31,9 +31,9 @@ authService:
 userService:
   deploymentname: user-service-deployment
   servicename: user-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-user-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: users
@@ -43,9 +43,9 @@ userService:
 restaurantService:
   deploymentname: restaurant-service-deployment
   servicename: restaurant-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-restaurant-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: restaurants
@@ -55,9 +55,9 @@ restaurantService:
 menuService:
   deploymentname: menu-service-deployment
   servicename: menu-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-menu-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: menu
@@ -67,9 +67,9 @@ menuService:
 orderService:
   deploymentname: order-service-deployment
   servicename: order-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-order-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: orders
@@ -79,9 +79,9 @@ orderService:
 paymentService:
   deploymentname: payment-service-deployment
   servicename: payment-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-payment-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: payments
@@ -91,9 +91,9 @@ paymentService:
 deliveryService:
   deploymentname: delivery-service-deployment
   servicename: delivery-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-delivery-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: delivery
@@ -103,9 +103,9 @@ deliveryService:
 notificationService:
   deploymentname: notification-service-deployment
   servicename: notification-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-notification-service
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   schema: notifications
@@ -118,9 +118,9 @@ notificationService:
 frontend:
   deploymentname: frontend-deployment
   servicename: frontend-service
-  image: 
+  image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-frontend
-    tag: 2fec561
+    tag: f972cfb
   replicas: 1
   port: 8080
   hpa: frontend-autoscaler
@@ -135,7 +135,7 @@ postgres:
   image: postgres:16-alpine
   port: 5432
   storage: 10Gi
-  storageClass: gp3 
+  storageClass: gp3
 redis:
   name: redis
   servicename: redis
