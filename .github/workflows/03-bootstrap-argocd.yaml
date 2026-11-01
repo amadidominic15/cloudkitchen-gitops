@@ -12,7 +12,7 @@ permissions:
 
 env:
   AWS_REGION: eu-north-1
-  CLUSTER_NAME: eks
+  CLUSTER_NAME: dev-cloudkitchen-eu-north-1-eks
 
 jobs:
   bootstrap:
