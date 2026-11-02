@@ -7,6 +7,10 @@ variable "enable_nat_gateway" {}
 variable "single_nat_gateway" {}
 variable "enable_vpc_endpoints" {}
 variable "kubernetes_version" {}
+variable "node_instance_types" {}
+variable "node_min_size" {}
+variable "node_desired_size" {}
+variable "node_max_size" {}
 variable "cluster_public_access_cidrs" {}
 variable "admin_principal_arns" {}
 variable "repository_names" {}
