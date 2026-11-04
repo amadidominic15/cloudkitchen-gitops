@@ -4,7 +4,7 @@ metadata:
   name: kube-prometheus-stack
   namespace: argocd
 spec:
-  project: platform
+  project: cloudkitchen
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
@@ -37,9 +37,24 @@ spec:
               type: loki
               access: proxy
               url: http://loki-gateway.loki.svc.cluster.local:80
+            - name: Tempo
+              type: tempo
+              access: proxy
+              url: http://tempo.monitoring.svc.cluster.local:3200
+              isDefault: true
+              jsonData:
+                tracesToLogsV2:
+                  datasourceUid: loki
+                  spanStartTimeShift: 1h
+                  spanEndTimeShift: 1h
+                  tags:
+                    - service.name
+                    - k8s.namespace.name
+                  filterByTraceID: true
           resources:
             requests: {cpu: 250m, memory: 512Mi}
             limits: {cpu: "1", memory: 1Gi}
+            
         prometheus:
           enabled: true
           service:
@@ -55,7 +70,7 @@ spec:
                   accessModes: [ReadWriteOnce]
                   resources:
                     requests:
-                      storage: 20Gi
+                      storage: 50Gi
             resources:
               requests: {cpu: 500m, memory: 1Gi}
               limits: {cpu: "2", memory: 4Gi}
@@ -71,7 +86,7 @@ spec:
                     - ReadWriteOnce
                   resources:
                     requests:
-                      storage: 10Gi
+                      storage: 5Gi
             resources:
               requests: {cpu: 100m, memory: 128Mi}
               limits: {cpu: "250m", memory: 512Mi}

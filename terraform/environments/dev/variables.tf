@@ -17,6 +17,7 @@ variable "repository_names" {}
 variable "lb_controller_chart_version" {}
 variable "argocd_chart_version" {}
 variable "envoy_gateway_version" {}
+variable "karpenter_chart_version" {}
 variable "deployment_replicas" {}
 variable "secrets_store_csi_driver_chart_version" {}
 variable "secrets" {}

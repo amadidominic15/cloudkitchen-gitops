@@ -18,6 +18,7 @@ lb_controller_chart_version            = "3.6.0"
 argocd_chart_version                   = "10.10.3"
 secrets_store_csi_driver_chart_version = "3.1.4"
 envoy_gateway_version                  = "1.9.3"
-secrets                                = { "dev/cloudkitchen/application" = {recovery_window_in_days = 0 } }
+karpenter_chart_version                = "1.15.1"
+secrets                                = { "dev/cloudkitchen/application" = { recovery_window_in_days = 0 } }
 application_secret_names               = ["dev/cloudkitchen/application"]
 deployment_replicas                    = 2
