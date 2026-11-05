@@ -67,6 +67,8 @@ spec:
       kind: PriorityClass
     - group: apiregistration.k8s.io
       kind: APIService
+    - group: gateway.networking.k8s.io
+      kind: GatewayClass
 
   # ---------------------------------------------------------------------------
   # Namespaced resources allowed inside the destination namespaces.
