@@ -19,6 +19,7 @@ spec:
         prometheus.io/port: "{{ .Values.deliveryService.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532

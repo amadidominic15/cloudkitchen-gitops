@@ -27,6 +27,7 @@ spec:
       - name: menu-service
         image: {{ .Values.menuService.image.repository }}:{{ .Values.menuService.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

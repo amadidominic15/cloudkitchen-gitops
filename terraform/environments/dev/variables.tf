@@ -19,6 +19,7 @@ variable "argocd_chart_version" {}
 variable "envoy_gateway_version" {}
 variable "karpenter_chart_version" {}
 variable "deployment_replicas" {}
+variable "replicas" {}
 variable "secrets_store_csi_driver_chart_version" {}
 variable "secrets" {}
 variable "application_secret_names" {

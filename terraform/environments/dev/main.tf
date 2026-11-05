@@ -59,6 +59,7 @@ module "cluster_addons" {
   vpc_id                                 = module.vpc.vpc_id
   lb_controller_chart_version            = var.lb_controller_chart_version
   argocd_chart_version                   = var.argocd_chart_version
+  replicas                               = var.replicas
   secrets_store_csi_driver_chart_version = var.secrets_store_csi_driver_chart_version
   karpenter_chart_version                = var.karpenter_chart_version
   deployment_replicas                    = var.deployment_replicas
@@ -73,6 +74,7 @@ module "secrets_manager" {
 module "iam" {
   source                          = "git::https://github.com/amadidominic15/terraform-modules.git//aws-modules/iam?ref=main"
   name_prefix                     = local.name_prefix
+  aws_region                      = var.aws_region
   enable_vpc_cni                  = true
   enable_ebs_csi                  = true
   enable_cloudwatch               = true

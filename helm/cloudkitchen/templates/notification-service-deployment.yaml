@@ -27,6 +27,7 @@ spec:
       - name: notification-service
         image: {{ .Values.notificationService.image.repository }}:{{ .Values.notificationService.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

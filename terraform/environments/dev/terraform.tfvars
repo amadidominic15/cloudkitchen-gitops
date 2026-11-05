@@ -4,8 +4,8 @@ project                                = "cloudkitchen"
 kubernetes_version                     = "1.37"
 node_instance_types                    = ["c7i-flex.large"]
 node_min_size                          = 1
-node_desired_size                      = 2
-node_max_size                          = 3
+node_desired_size                      = 4
+node_max_size                          = 5
 azs_count                              = 2
 vpc_cidr                               = "10.0.0.0/16"
 enable_nat_gateway                     = true
@@ -22,3 +22,4 @@ karpenter_chart_version                = "1.15.1"
 secrets                                = { "dev/cloudkitchen/application" = { recovery_window_in_days = 0 } }
 application_secret_names               = ["dev/cloudkitchen/application"]
 deployment_replicas                    = 2
+replicas                               = 2
