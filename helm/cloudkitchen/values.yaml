@@ -21,7 +21,7 @@ authService:
   servicename: auth-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-auth-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: auth # PostgreSQL schema this service owns
@@ -33,7 +33,7 @@ userService:
   servicename: user-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-user-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: users
@@ -45,7 +45,7 @@ restaurantService:
   servicename: restaurant-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-restaurant-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: restaurants
@@ -57,7 +57,7 @@ menuService:
   servicename: menu-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-menu-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: menu
@@ -69,7 +69,7 @@ orderService:
   servicename: order-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-order-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: orders
@@ -81,7 +81,7 @@ paymentService:
   servicename: payment-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-payment-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: payments
@@ -93,7 +93,7 @@ deliveryService:
   servicename: delivery-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-delivery-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: delivery
@@ -105,7 +105,7 @@ notificationService:
   servicename: notification-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-notification-service
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   schema: notifications
@@ -120,7 +120,7 @@ frontend:
   servicename: frontend-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-frontend
-    tag: 788c52b
+    tag: afdd53f
   replicas: 1
   port: 8080
   hpa: frontend-autoscaler
