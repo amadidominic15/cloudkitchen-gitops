@@ -19,6 +19,7 @@ spec:
         prometheus.io/port: "{{ .Values.orderService.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
@@ -27,7 +28,6 @@ spec:
       - name: order-service
         image: {{ .Values.orderService.image.repository }}:{{ .Values.orderService.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
-        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

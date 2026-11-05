@@ -28,7 +28,6 @@ spec:
       - name: restaurant-service
         image: {{ .Values.restaurantService.image.repository }}:{{ .Values.restaurantService.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
-        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

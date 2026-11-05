@@ -15,6 +15,7 @@ spec:
       labels:
         app: frontend
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }} 
       securityContext:
         runAsNonRoot: true
         runAsUser: 101          # nginx user in the nginx:alpine image
@@ -23,7 +24,6 @@ spec:
       - name: frontend
         image: {{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
-        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:

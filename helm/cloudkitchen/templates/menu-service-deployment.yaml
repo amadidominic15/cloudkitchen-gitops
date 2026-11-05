@@ -19,6 +19,7 @@ spec:
         prometheus.io/port: "{{ .Values.menuService.port }}"
         prometheus.io/path: "/metrics"
     spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
@@ -27,7 +28,6 @@ spec:
       - name: menu-service
         image: {{ .Values.menuService.image.repository }}:{{ .Values.menuService.image.tag }}
         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
-        serviceAccountName: {{ .Values.serviceAccount.name }}
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
