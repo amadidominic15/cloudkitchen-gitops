@@ -12,7 +12,7 @@ namespace: cloudkitchen
 imagePullPolicy: Always
 serviceAccount:
   create: true
-  name: cloudkitchen-secrets-sa
+  name: cloudkitchen-sa
 # -----------------------------------------------------------------------------
 # Backend microservices (all listen on :8080, expose /healthz and /readyz)
 # -----------------------------------------------------------------------------

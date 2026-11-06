@@ -5,16 +5,13 @@ metadata:
   namespace: argocd
 spec:
   project: default
-
   source:
     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
     targetRevision: main
     path: gitops/resources/storage
-
   destination:
     server: https://kubernetes.default.svc
     namespace: default
-
   syncPolicy:
     automated:
       prune: false #Removed from Git, but Argo CD leaves the resource in the cluster.
