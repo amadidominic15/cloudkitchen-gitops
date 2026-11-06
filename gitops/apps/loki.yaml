@@ -29,8 +29,8 @@ spec:
           storage:
             type: s3
             bucketNames:
-              chunks: "dev-cloudkitchen-eu-north-1-loki-chunks-1026"
-              ruler: "dev-cloudkitchen-eu-north-1-loki-ruler-1026"
+              chunks: "dev-cloudkitchen-eu-north-1-loki-chunks-10-26"
+              ruler: "dev-cloudkitchen-eu-north-1-loki-ruler-10-26"
             s3:
               region: eu-north-1
           storage_config:
@@ -78,4 +78,4 @@ spec:
       prune: true
       selfHeal: true
     syncOptions: 
-      CreateNamespace=true
+      - CreateNamespace=true

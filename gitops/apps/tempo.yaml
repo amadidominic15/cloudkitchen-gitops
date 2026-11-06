@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://grafana.github.io/helm-charts
     chart: tempo
-    targetRevision: REPLACE_WITH_CHART_VERSION
+    targetRevision: "1.24.4"
     helm:
       releaseName: tempo
       values: |
@@ -29,7 +29,7 @@ spec:
               trace:
                 backend: s3
                 s3:
-                  bucket: "dev-cloudkitchen-eu-north-1-tempo-1026"
+                  bucket: "dev-cloudkitchen-eu-north-1-tempo-10-26"
                   endpoint: s3.eu-north-1.amazonaws.com
                   region: eu-north-1
         persistence:

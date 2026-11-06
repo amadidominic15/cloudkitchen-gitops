@@ -98,7 +98,7 @@ module "s3" {
   environment = var.environment
   buckets = {
     loki_chunks = {
-      bucket_name        = "${local.name_prefix}-loki-chunks-1026"
+      bucket_name        = "${local.name_prefix}-loki-chunks-10-26"
       purpose            = "Loki chunks storage"
       versioning_enabled = true
       enable_encryption  = true
@@ -108,7 +108,7 @@ module "s3" {
       }
     }
     loki_ruler = {
-      bucket_name        = "${local.name_prefix}-loki-ruler-1026"
+      bucket_name        = "${local.name_prefix}-loki-ruler-10-26"
       purpose            = "Loki ruler storage"
       versioning_enabled = true
       enable_encryption  = true
@@ -118,7 +118,7 @@ module "s3" {
       }
     }
     tempo = {
-      bucket_name        = "${local.name_prefix}-tempo-1026"
+      bucket_name        = "${local.name_prefix}-tempo-10-26"
       purpose            = "Tempo storage"
       versioning_enabled = true
       enable_encryption  = true
