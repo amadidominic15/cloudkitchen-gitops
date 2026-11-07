@@ -1,10 +1,22 @@
 name: "Infrastructure Deployment"
+
 on:
   workflow_dispatch:
+    inputs:
+      action:
+        description: "Select Terraform operation"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+        default: apply
+
 permissions:
   id-token: write
   contents: read
   security-events: write
+
 env:
   AWS_REGION: eu-north-1
 
@@ -12,6 +24,7 @@ jobs:
   security-scan:
     name: "Security Scanning"
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,9 +54,14 @@ jobs:
           ignore-unfixed: true
 
   terraform-deployment:
-    name: "Terraform Deployment"
+    name: "Terraform ${{ inputs.action }}"
     needs: security-scan
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform/environments/dev
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -58,24 +76,39 @@ jobs:
       # ----------------------------------------
       # Setup Terraform
       # ----------------------------------------
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        working-directory: terraform/environments/dev
-        run: terraform init
+        run: terraform init -input=false
 
       - name: Terraform Format
-        run: terraform fmt
+        run: terraform fmt -check -recursive
 
       - name: Terraform Validate
-        working-directory: terraform/environments/dev
         run: terraform validate
 
+      # ----------------------------------------
+      # Terraform Plan
+      # ----------------------------------------
+
       - name: Terraform Plan
-        working-directory: terraform/environments/dev
-        run: terraform plan -out=tfplan
+        if: inputs.action == 'apply'
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Destroy Plan
+        if: inputs.action == 'destroy'
+        run: terraform plan -destroy -input=false -out=tfplan
+
+      # ----------------------------------------
+      # Terraform Apply / Destroy
+      # ----------------------------------------
 
       - name: Terraform Apply
-        working-directory: terraform/environments/dev
-        run: terraform destroy -auto-approve tfplan
+        if: inputs.action == 'apply'
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Terraform Destroy
+        if: inputs.action == 'destroy'
+        run: terraform apply -input=false -auto-approve tfplan
