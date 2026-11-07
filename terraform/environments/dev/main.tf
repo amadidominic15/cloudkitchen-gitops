@@ -82,14 +82,12 @@ module "iam" {
   enable_external_dns             = true
   enable_loki                     = true
   enable_karpenter                = true
+  enable_application_secrets      = true
   tempo_bucket_arn                = module.s3.bucket_arns["tempo"]
   loki_bucket_arn = [
     module.s3.bucket_arns["loki_chunks"], module.s3.bucket_arns["loki_ruler"]
   ]
-  enable_application_secrets = true
-  application_secret_arns = concat(
-    [for name in var.application_secret_names : module.secrets_manager.secret_arns[name]]
-  )
+  application_secrets = local.application_secrets
 }
 
 module "s3" {

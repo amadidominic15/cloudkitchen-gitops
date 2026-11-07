@@ -3,6 +3,8 @@ kind: Gateway
 metadata:
   name: public-gateway
   namespace: envoy-gateway-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   gatewayClassName: envoy-gateway
   listeners:
@@ -14,7 +16,7 @@ spec:
         namespaces:
           from: All
     - name: https
-      protocol: HTTP
+      protocol: HTTP  # Changed from HTTPS to HTTP because AWS NLB handles the SSL termination
       port: 443
       hostname: "*.dglobaleng.com.ng"
       allowedRoutes:

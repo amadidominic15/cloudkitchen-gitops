@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/license-Personal_&_Educational_Use-orange.svg)](LICENSE)
 
 > A cloud-native, event-driven **food-delivery platform** built as 8 Go
-> microservices plus a React frontend, deployed to **AWS EKS or Google GKE**
+> microservices plus a React frontend, deployed to **AWS EKS**
 > via **GitOps** with a full observability and security baseline.
 
 CloudKitchen is a portfolio-grade reference platform demonstrating microservice
@@ -49,22 +49,11 @@ production-style monitoring/logging/security.
 ## Repository layout (flat monorepo)
 
 ```
-cloudkitchen-app/
-├── auth/            # Go service — authentication & JWT
-├── user/            # Go service — user profiles
-├── restaurant/      # Go service — restaurant management
-├── menu/            # Go service — menu items
-├── order/           # Go service — order lifecycle
-├── payment/         # Go service — payments
-├── delivery/        # Go service — delivery tracking
-├── notification/    # Go service — notifications
-├── frontend/        # React SPA
+cloudkitchen-gitops/
 ├── helm/            # Helm chart(s)
-├── terraform/   # AWS infra (VPC, EKS, ECR, IAM/IRSA) — eu-north-1
-├── argocd/          # ArgoCD Applications (App-of-Apps)
-├── monitoring/      # Prometheus + Grafana values & dashboards
-├── logging/         # Loki + Promtail values
-├── security/        # acm, network policies, PSS, trivy, secrets
+├── services/        # all the microservices
+├── terraform/       # AWS infra (VPC, EKS, ECR, IAM/IRSA) — eu-north-1
+├── gitops/          # ArgoCD Applications (App-of-Apps)
 ├── docker/          # docker-compose local stack
 ├── docs/            # architecture & docs index
 ├── .github/         # GitHub Actions workflows
@@ -113,22 +102,15 @@ flowchart LR
 ```
 
 1. **Provision** infrastructure with **Terraform**. On AWS that's VPC + EKS +
-   ECR + IAM/IRSA in `us-east-1` (`aws-terraform/`). On GCP that's VPC + GKE +
-   Artifact Registry + IAM in `us-central1` (`gcp-terraform/`).
+   ECR + IAM/IRSA in `eu-north-1` (`terraform/`). 
 2. **Bootstrap** the cluster: namespaces, Traefik, cert-manager, ArgoCD,
    kube-prometheus-stack, Loki/Promtail.
 3. **CI** (GitHub Actions): matrix build per service → **Trivy** scan →
-   push to the container registry (**ECR** on AWS, **Artifact Registry** on
-   GCP) → bump image tags in `helm/cloudkitchen/values.yaml` → commit.
+   push to the container registry (**ECR** on AWS) → bump image tags in `helm/cloudkitchen/values.yaml` → commit.
    **No `helm upgrade` in CI.**
 4. **GitOps**: **ArgoCD** detects the committed change and **auto-syncs** the
    Helm release to the Kubernetes cluster.
 
-See the area guides:
-[monitoring](monitoring/README.md) ·
-[logging](logging/README.md) ·
-[security](security/README.md) ·
-[docs index](docs/README.md).
 
 ## License
 

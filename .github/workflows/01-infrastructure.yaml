@@ -66,7 +66,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Format
-        run: terraform fmt -recursive terraform
+        run: terraform fmt
 
       - name: Terraform Validate
         working-directory: terraform/environments/dev
@@ -78,4 +78,4 @@ jobs:
 
       - name: Terraform Apply
         working-directory: terraform/environments/dev
-        run: terraform apply -auto-approve tfplan
+        run: terraform destroy -auto-approve tfplan

@@ -2,7 +2,7 @@ locals {
   name_prefix = "${var.environment}-${var.project}-${var.aws_region}"
 
   application_secrets = {
-    cloudkitchen-application = {
+    app = {
       namespace       = "cloudkitchen"
       service_account = "cloudkitchen-sa"
       secret_arns = [

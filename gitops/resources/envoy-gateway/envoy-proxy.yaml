@@ -3,6 +3,8 @@ kind: EnvoyProxy
 metadata:
   name: public-envoy-config
   namespace: envoy-gateway-system
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   provider:
     type: Kubernetes
@@ -20,4 +22,4 @@ spec:
           service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: "tcp"
           service.beta.kubernetes.io/aws-load-balancer-manage-backend-security-group-rules: "true"
           service.beta.kubernetes.io/aws-load-balancer-attributes: "load_balancing.cross_zone.enabled=true"
-          service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "Environment=production,ManagedBy=EnvoyGateway"
+          service.beta.kubernetes.io/aws-load-balancer-additional-resource-tags: "Environment=dev,ManagedBy=EnvoyGateway"

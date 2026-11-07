@@ -18,4 +18,6 @@ spec:
     automated:
       prune: true  #Removed from Git, and Argo CD can delete the resource during synchronization.
       selfHeal: true
+    syncOptions:
+      - ServerSideApply=true
 

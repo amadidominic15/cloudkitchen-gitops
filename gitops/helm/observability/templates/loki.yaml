@@ -1,0 +1,22 @@
+{{- if .Values.applications.loki.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki
+  namespace: argocd
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.applications.loki.repoURL }}
+    chart: {{ .Values.applications.loki.chart }}
+    targetRevision: {{ .Values.applications.loki.version | quote }}
+    helm:
+      releaseName: {{ .Values.applications.loki.releaseName }}
+      values: |
+        {{- toYaml .Values.applications.loki.values | nindent 8 }}
+  destination:
+    server: {{ .Values.argocd.destination.server }}
+    namespace: {{ .Values.applications.loki.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.argocd.syncPolicy | nindent 4 }}
+{{- end }}

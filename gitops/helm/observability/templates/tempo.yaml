@@ -1,0 +1,22 @@
+{{- if .Values.applications.tempo.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tempo
+  namespace: argocd
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.applications.tempo.repoURL }}
+    chart: {{ .Values.applications.tempo.chart }}
+    targetRevision: {{ .Values.applications.tempo.version | quote }}
+    helm:
+      releaseName: {{ .Values.applications.tempo.releaseName }}
+      values: |
+        {{- toYaml .Values.applications.tempo.values | nindent 8 }}
+  destination:
+    server: {{ .Values.argocd.destination.server }}
+    namespace: {{ .Values.applications.tempo.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.argocd.syncPolicy | nindent 4 }}
+{{- end }}

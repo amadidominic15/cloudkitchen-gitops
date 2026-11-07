@@ -1,0 +1,227 @@
+argocd:
+  project: cloudkitchen
+  repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
+  targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true
+
+applications:
+  kubePrometheusStack:
+    enabled: true
+    namespace: observability
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    version: "92.10.0"
+    releaseName: kube-prometheus-stack
+    values: # ◄--- ALL SUB-CHART CONFIGS MUST NEST UNDER THIS BLOCK
+      
+      # 1. Kube-State-Metrics Configuration
+      kube-state-metrics:
+        enabled: true
+
+      # 2. Node-Exporter Configuration
+      prometheus-node-exporter: 
+        enabled: true
+
+      # 3. Grafana Configuration
+      grafana:
+        enabled: true
+        replicas: 1
+        persistence:
+          enabled: true
+          storageClassName: gp3
+          accessModes:
+            - ReadWriteOnce
+          size: 10Gi
+        service:
+          type: ClusterIP
+          port: 80
+        additionalDataSources:
+          - name: Loki
+            uid: loki
+            type: loki
+            access: proxy
+            url: http://loki-gateway.observability.svc.cluster.local
+            isDefault: false
+          - name: Tempo
+            uid: tempo
+            type: tempo
+            access: proxy
+            url: http://tempo.observability.svc.cluster.local:3200
+            isDefault: false
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+
+      # 4. Prometheus Engine Configuration
+      prometheus:
+        enabled: true
+        prometheusSpec:
+          replicas: 1
+          retention: 15d
+          scrapeInterval: 30s
+          evaluationInterval: 30s
+          serviceMonitorSelector: {}
+          podMonitorSelector: {}
+          serviceMonitorNamespaceSelector: {}
+          podMonitorNamespaceSelector: {}
+          serviceMonitorSelectorNilUsesHelmValues: false
+          podMonitorSelectorNilUsesHelmValues: false
+          storageSpec:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: gp3
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 30Gi
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+
+      # 5. Alertmanager Configuration
+      alertmanager:
+        enabled: true
+        alertmanagerSpec:
+          replicas: 1
+          storage:
+            volumeClaimTemplate:
+              spec:
+                storageClassName: gp3
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 5Gi
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+
+  loki:
+    enabled: true
+    namespace: observability
+    repoURL: https://grafana-community.github.io/helm-charts
+    chart: loki
+    version: "18.5.0"
+    releaseName: loki
+    values:
+      deploymentMode: Monolithic
+      loki:
+        auth_enabled: false
+        commonConfig:
+          replication_factor: 1
+        schemaConfig:
+          configs:
+            - from: "2024-04-01"
+              store: tsdb
+              object_store: s3
+              schema: v13
+              index:
+                prefix: loki_index_
+                period: 24h
+
+        storage:
+          type: s3
+          bucketNames:
+            chunks: "dev-cloudkitchen-eu-north-1-loki-chunks-10-26"
+            ruler: "dev-cloudkitchen-eu-north-1-loki-ruler-10-26"
+          s3:
+            region: eu-north-1
+        limits_config:
+          allow_structured_metadata: true
+          retention_period: 336h
+        compactor:
+          retention_enabled: true
+          delete_request_store: s3
+
+      serviceAccount:
+        create: true
+        name: loki
+
+      singleBinary:
+        replicas: 1
+
+        persistence:
+          enabled: true
+          storageClass: gp3
+          accessModes:
+            - ReadWriteOnce
+          size: 20Gi
+
+      gateway:
+        enabled: true
+      minio:
+        enabled: false
+      backend:
+        replicas: 0
+      read:
+        replicas: 0
+      write:
+        replicas: 0
+
+  tempo:
+    enabled: true
+    namespace: observability
+    repoURL: https://grafana-community.github.io/helm-charts
+    chart: tempo
+    version: "2.3.0"
+    releaseName: tempo
+    values:
+      serviceAccount:
+        create: true
+        name: tempo
+
+      persistence:
+        enabled: true
+        storageClassName: gp3
+        size: 10Gi
+
+      tempo:
+        reportingEnabled: false
+        metricsGenerator:
+          enabled: true
+        distributor:
+          receivers:
+            otlp:
+              protocols:
+                grpc:
+                  endpoint: 0.0.0.0:4317
+                http:
+                  endpoint: 0.0.0.0:4318
+
+        storage:
+          trace:
+            backend: s3
+            s3:
+              bucket: "dev-cloudkitchen-eu-north-1-tempo-10-26"
+              endpoint: s3.eu-north-1.amazonaws.com
+              region: eu-north-1
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 512m
+              memory: 1Gi
