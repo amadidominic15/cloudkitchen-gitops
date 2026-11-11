@@ -29,15 +29,13 @@ spec:
 
   # ---------------------------------------------------------------------------
   # Allowed deployment destinations (cluster + namespace).
-  # The 5 platform namespaces are whitelisted on the in-cluster API server.
+  # The platform namespaces are whitelisted on the in-cluster API server.
   # ---------------------------------------------------------------------------
   destinations:
     - server: https://kubernetes.default.svc
       namespace: cloudkitchen
     - server: https://kubernetes.default.svc
-      namespace: monitoring
-    - server: https://kubernetes.default.svc
-      namespace: loki
+      namespace: observability
     - server: https://kubernetes.default.svc
       namespace: envoy-gateway-system
     - server: https://kubernetes.default.svc

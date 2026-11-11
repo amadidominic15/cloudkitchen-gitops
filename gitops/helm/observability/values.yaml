@@ -15,6 +15,9 @@ argocd:
       - PruneLast=true
 
 applications:
+  # ==========================================================
+  # 1. KUBE PROMETHEUS STACK
+  # ==========================================================
   kubePrometheusStack:
     enabled: true
     namespace: observability
@@ -24,18 +27,25 @@ applications:
     releaseName: kube-prometheus-stack
     values: # ◄--- ALL SUB-CHART CONFIGS MUST NEST UNDER THIS BLOCK
       
-      # 1. Kube-State-Metrics Configuration
+      # a. Kube-State-Metrics Configuration
       kube-state-metrics:
         enabled: true
 
-      # 2. Node-Exporter Configuration
+      # b. Node-Exporter Configuration
       prometheus-node-exporter: 
         enabled: true
 
-      # 3. Grafana Configuration
+      # c. Grafana Configuration
       grafana:
         enabled: true
         replicas: 1
+        grafana:
+        sidecar:
+          dashboards:
+            enabled: true
+            label: grafana_dashboard
+            labelValue: "1"
+            searchNamespace: ALL
         persistence:
           enabled: true
           storageClassName: gp3
@@ -63,10 +73,10 @@ applications:
             cpu: 250m
             memory: 512Mi
           limits:
-            cpu: 1000m
-            memory: 2Gi
+            cpu: 500m
+            memory: 1Gi
 
-      # 4. Prometheus Engine Configuration
+      # d. Prometheus Engine Configuration
       prometheus:
         enabled: true
         prometheusSpec:
@@ -88,16 +98,16 @@ applications:
                   - ReadWriteOnce
                 resources:
                   requests:
-                    storage: 30Gi
+                    storage: 10Gi
           resources:
             requests:
+              cpu: 250m
+              memory: 500Mi
+            limits:
               cpu: 500m
               memory: 1Gi
-            limits:
-              cpu: 1000m
-              memory: 2Gi
 
-      # 5. Alertmanager Configuration
+      # e. Alertmanager Configuration
       alertmanager:
         enabled: true
         alertmanagerSpec:
@@ -113,12 +123,15 @@ applications:
                     storage: 5Gi
           resources:
             requests:
+              cpu: 250m
+              memory: 500Mi
+            limits:
               cpu: 500m
               memory: 1Gi
-            limits:
-              cpu: 1000m
-              memory: 2Gi
 
+  # ==========================================================
+  # 2. LOKI - LOG STORAGE
+  # ==========================================================
   loki:
     enabled: true
     namespace: observability
@@ -162,6 +175,13 @@ applications:
 
       singleBinary:
         replicas: 1
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+           cpu: 500m
+           memory: 1Gi
 
         persistence:
           enabled: true
@@ -180,7 +200,9 @@ applications:
         replicas: 0
       write:
         replicas: 0
-
+  # ==========================================================
+  # 3. TEMPO - DISTRIBUTED TRACING STORAGE
+  # ==========================================================
   tempo:
     enabled: true
     namespace: observability
@@ -189,7 +211,7 @@ applications:
     version: "2.3.0"
     releaseName: tempo
     values:
-      serviceAccount:
+      serviceAccount: #AWS permission through EKS Pod Identity
         create: true
         name: tempo
 
@@ -218,10 +240,60 @@ applications:
               bucket: "dev-cloudkitchen-eu-north-1-tempo-10-26"
               endpoint: s3.eu-north-1.amazonaws.com
               region: eu-north-1
-          resources:
-            requests:
-              cpu: 250m
-              memory: 512Mi
-            limits:
-              cpu: 512m
-              memory: 1Gi
+        resources:
+          requests:
+            cpu: 250m
+            memory: 512Mi
+          limits:
+            cpu: 512m
+            memory: 1Gi
+# ==========================================================
+# 4. GRAFANA ALLOY - KUBERNETES LOG COLLECTION
+# ==========================================================
+  alloy:
+    enabled: true
+    namespace: observability
+    repoURL: https://grafana.github.io/helm-charts
+    chart: alloy
+    version: "1.12.1"
+    releaseName: alloy
+    values:
+      controller:
+        type: daemonset
+      alloy:
+        enableReporting: false
+        configMap:
+          create: true
+          content: |
+            logging {
+              level  = "info"
+              format = "logfmt"
+            }
+            discovery.kubernetes "pods" {
+              role = "pod"
+            }
+            loki.source.kubernetes "pods" {
+              targets    = discovery.kubernetes.pods.targets
+              forward_to = [loki.write.local.receiver]
+            }
+            loki.write "local" {
+              endpoint {
+                url = "http://loki-gateway.observability.svc.cluster.local/loki/api/v1/push"
+              }
+            }
+      serviceAccount: #The permissions allow Alloy to discover workloads and collect their logs through the Kubernetes API
+        create: true
+        name: alloy
+      rbac:
+        create: true
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits:
+          cpu: 200m
+          memory: 256Mi
+
+
+
+

@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
     targetRevision: main
-    path: gitops/resources/envoy-gateway
+    path: gitops/envoy-gateway
     directory:
       recurse: true
   destination:

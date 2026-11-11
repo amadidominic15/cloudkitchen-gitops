@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudkitchen-monitoring
+  namespace: argocd
+spec:
+  project: cloudkitchen
+  source:
+    repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
+    targetRevision: main
+    path: gitops/monitoring
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - PruneLast=true

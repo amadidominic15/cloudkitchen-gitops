@@ -1,0 +1,20 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3
+provisioner: ebs.csi.aws.com
+parameters:
+  type: gp3
+  encrypted: "true"
+  csi.storage.k8s.io/fstype: ext4
+  # Project identification
+  tagSpecification_1: "Project=CloudKitchen"
+  tagSpecification_2: "ManagedBy=EBS-CSI"
+  # Dynamic Kubernetes resource identification
+  tagSpecification_3: "KubernetesNamespace={{ .PVCNamespace }}"
+  tagSpecification_4: "PVCName={{ .PVCName }}"
+  tagSpecification_5: "PVName={{ .PVName }}"
+  tagSpecification_6: "WorkloadPVC={{ .PVCName }}" # Dynamic workload identification using the PVC name
+reclaimPolicy: Delete #Use Retain for production to keep the data even after the PVC is deleted. Use Delete for development to automatically delete the data when the PVC is deleted.
+allowVolumeExpansion: true
+volumeBindingMode: WaitForFirstConsumer

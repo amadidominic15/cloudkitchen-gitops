@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
     targetRevision: main
-    path: gitops/resources/routes
+    path: gitops/routes
     directory:
       recurse: true
   destination:

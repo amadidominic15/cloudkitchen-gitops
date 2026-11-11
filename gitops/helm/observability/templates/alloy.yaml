@@ -1,0 +1,22 @@
+{{- if .Values.applications.alloy.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  project: {{ .Values.argocd.project }}
+  source:
+    repoURL: {{ .Values.applications.alloy.repoURL }}
+    chart: {{ .Values.applications.alloy.chart }}
+    targetRevision: {{ .Values.applications.alloy.version | quote }}
+    helm:
+      releaseName: {{ .Values.applications.alloy.releaseName }}
+      values: |
+        {{- toYaml .Values.applications.alloy.values | nindent 8 }}
+  destination:
+    server: {{ .Values.argocd.destination.server }}
+    namespace: {{ .Values.applications.alloy.namespace }}
+  syncPolicy:
+    {{- toYaml .Values.argocd.syncPolicy | nindent 4 }}
+{{- end }}
