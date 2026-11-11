@@ -11,6 +11,11 @@ on:
           - apply
           - destroy
         default: apply
+      upgrade:
+        description: "Run terraform init -upgrade"
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   id-token: write
@@ -72,27 +77,23 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-
       # ----------------------------------------
       # Setup Terraform
       # ----------------------------------------
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform init -input=false
+        run: terraform init -input=false ${{ inputs.upgrade && '-upgrade' || '' }}
 
       - name: Terraform Format
         run: terraform fmt -check -recursive
 
       - name: Terraform Validate
         run: terraform validate
-
       # ----------------------------------------
       # Terraform Plan
       # ----------------------------------------
-
       - name: Terraform Plan
         if: inputs.action == 'apply'
         run: terraform plan -input=false -out=tfplan
@@ -100,11 +101,9 @@ jobs:
       - name: Terraform Destroy Plan
         if: inputs.action == 'destroy'
         run: terraform plan -destroy -input=false -out=tfplan
-
       # ----------------------------------------
       # Terraform Apply / Destroy
       # ----------------------------------------
-
       - name: Terraform Apply
         if: inputs.action == 'apply'
         run: terraform apply -input=false -auto-approve tfplan
