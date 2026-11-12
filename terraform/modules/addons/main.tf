@@ -1,18 +1,18 @@
 module "eks_blueprint_addons" {
-  source  = "aws-ia/eks-blueprints-addons/aws"
-  version = "~> 1.24.0"
-  cluster_name      = var.cluster_name
-  cluster_endpoint  = var.cluster_endpoint
-  cluster_version   = var.cluster_version
-  oidc_provider_arn = var.oidc_provider_arn
+  source                              = "aws-ia/eks-blueprints-addons/aws"
+  version                             = "~> 1.24.0"
+  cluster_name                        = var.cluster_name
+  cluster_endpoint                    = var.cluster_endpoint
+  cluster_version                     = var.cluster_version
+  oidc_provider_arn                   = var.oidc_provider_arn
   enable_aws_load_balancer_controller = true
-  enable_argocd                        = true
+  enable_argocd                       = true
 
   aws_load_balancer_controller = {
-    chart         = "aws-load-balancer-controller"
-    chart_version = "3.5.0"
-    repository    = "https://aws.github.io/eks-charts"
-    namespace     = "kube-system"
+    chart            = "aws-load-balancer-controller"
+    chart_version    = "3.5.0"
+    repository       = "https://aws.github.io/eks-charts"
+    namespace        = "kube-system"
     create_namespace = true
     values = [
       yamlencode({
@@ -22,14 +22,14 @@ module "eks_blueprint_addons" {
 
         replicaCount = var.replica_count
         resources = {
-        requests = {
-          cpu    = "100m"
-          memory = "128Mi"
-        }
-        limits = {
-          cpu    = "200m"
-          memory = "256Mi"
-        }
+          requests = {
+            cpu    = "100m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "200m"
+            memory = "256Mi"
+          }
         }
         serviceAccount = {
           create = true
@@ -40,10 +40,10 @@ module "eks_blueprint_addons" {
   }
 
   argocd = {
-    chart         = "argo-cd"
-    chart_version = "10.10.3"
-    repository    = "https://argoproj.github.io/argo-helm"
-    namespace     = "argocd"
+    chart            = "argo-cd"
+    chart_version    = "10.10.3"
+    repository       = "https://argoproj.github.io/argo-helm"
+    namespace        = "argocd"
     create_namespace = true
 
     values = [

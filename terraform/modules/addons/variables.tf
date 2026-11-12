@@ -5,22 +5,22 @@ variable "environment" {
   type = string
 }
 variable "domain_name" {
-  type    = string
+  type = string
 }
 variable "server_replicas" {
-  type    = number
+  type = number
 }
 variable "controller_replicas" {
-  type    = number
+  type = number
 }
 variable "repo_server_replicas" {
-  type    = number
+  type = number
 }
 variable "application_set_replicas" {
-  type    = number
+  type = number
 }
 variable "replica_count" {
-  type    = number
+  type = number
 }
 variable "cluster_name" {
   description = "Name of the EKS cluster."

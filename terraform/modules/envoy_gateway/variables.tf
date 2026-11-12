@@ -1,13 +1,13 @@
 variable "aws_region" {
   type = string
 }
-variable "acm_certificate_arn" { 
-  type = string 
+variable "acm_certificate_arn" {
+  type = string
 }
 variable "envoy_gateway_version" {
-  type = string
+  type    = string
   default = "1.9.2"
 }
 variable "deployment_replicas" {
-  type    = number
+  type = number
 }

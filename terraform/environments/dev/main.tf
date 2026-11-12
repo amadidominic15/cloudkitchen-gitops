@@ -46,13 +46,7 @@ module "eks" {
     amazon-cloudwatch-observability = {}
     metrics-server                  = {}
   }
-  addon_configuration_values = {
-    aws-ebs-csi-driver = jsonencode({
-      controller = {
-        extraCreateMetadata = true
-      }
-    })
-  }
+  addon_configuration_values = {}
   node_instance_types = var.node_instance_types
   node_min_size       = var.node_min_size
   node_desired_size   = var.node_desired_size

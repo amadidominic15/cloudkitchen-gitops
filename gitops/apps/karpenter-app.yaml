@@ -1,23 +1,23 @@
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: karpenter-config
-  namespace: argocd
-spec:
-  project: cloudkitchen
-  source:
-    repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
-    targetRevision: main
-    path: gitops/karpenter
-    directory:
-      recurse: true
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: karpenter
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - ServerSideApply=true
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: karpenter-config
+#   namespace: argocd
+# spec:
+#   project: cloudkitchen
+#   source:
+#     repoURL: https://github.com/amadidominic15/cloudkitchen-gitops.git
+#     targetRevision: main
+#     path: gitops/karpenter
+#     directory:
+#       recurse: true
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: karpenter
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true
+#       - ServerSideApply=true

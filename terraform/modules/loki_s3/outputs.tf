@@ -1,4 +1,4 @@
-output "chunks_bucket" { 
+output "chunks_bucket" {
   value = aws_s3_bucket.chunks.bucket
 }
 output "ruler_bucket" {
