@@ -120,7 +120,7 @@ frontend:
   servicename: frontend-service
   image:
     repository: 092620891680.dkr.ecr.eu-north-1.amazonaws.com/cloudkitchen-frontend
-    tag: afdd53f
+    tag: 1679c92
   replicas: 1
   port: 8080
   hpa: frontend-autoscaler
