@@ -1,9 +1,9 @@
-
 package main
 
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -19,13 +19,11 @@ import (
 	"github.com/cloudkitchen/auth-service/internal/telemetry"
 	"github.com/cloudkitchen/auth-service/migrations"
 	"github.com/cloudkitchen/auth-service/pkg/broker"
-
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
-// parseLevel maps a LOG_LEVEL string to an slog.Level.
 func parseLevel(s string) slog.Level {
 	switch s {
 	case "debug":
@@ -40,53 +38,86 @@ func parseLevel(s string) slog.Level {
 }
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error("auth-service failed", "error", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	cfg := config.Load()
 
-	logger := slog.New(
-		slog.NewJSONHandler(
-			os.Stdout,
-			&slog.HandlerOptions{Level: parseLevel(cfg.LogLevel)},
-		),
-	)
+	logger := slog.New(slog.NewJSONHandler(
+		os.Stdout,
+		&slog.HandlerOptions{
+			Level: parseLevel(cfg.LogLevel),
+		},
+	))
 	slog.SetDefault(logger)
 
-	// Application context.
 	ctx := context.Background()
 
-	// --- OpenTelemetry tracing initialization. ---
+	// Initialize OpenTelemetry tracing.
 	shutdownTracing, err := telemetry.InitTracing(ctx, cfg.ServiceName)
 	if err != nil {
-		logger.Error("tracing initialization failed", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("initialize tracing: %w", err)
 	}
 
-	// --- Database: connect, ensure schema, run migrations. ---
+	defer func() {
+		shutdownCtx, cancel := context.WithTimeout(
+			context.Background(),
+			10*time.Second,
+		)
+		defer cancel()
+
+		if err := shutdownTracing(shutdownCtx); err != nil {
+			logger.Error("tracing shutdown failed", "error", err)
+		}
+	}()
+
+	// Connect to PostgreSQL.
 	pool, err := repository.Connect(ctx, cfg.DSN(), cfg.DBSchema)
 	if err != nil {
-		logger.Error("db connect failed", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("database connection failed: %w", err)
+	}
+	defer pool.Close()
+
+	// Run embedded database migrations.
+	if err := repository.RunMigrations(
+		ctx,
+		pool,
+		cfg.DBSchema,
+		migrations.FS,
+		".",
+	); err != nil {
+		return fmt.Errorf("database migrations failed: %w", err)
 	}
 
-	// --- Messaging: NATS broker. ---
+	logger.Info("database migrations applied", "schema", cfg.DBSchema)
+
+	// Connect to NATS.
 	b, err := broker.New(cfg.NATSURL, logger)
 	if err != nil {
-		logger.Error("nats connect failed", "error", err)
-		pool.Close()
-		_ = shutdownTracing(ctx)
-		logger.Error("nats connect failed", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("nats connection failed: %w", err)
 	}
+	defer b.Close()
 
-	// --- Wire layers: repository -> service -> handler. ---
+	// Wire application layers.
 	userRepo := repository.NewUserRepository(pool)
-	authSvc := service.NewAuthService(userRepo, b, cfg.JWTSecret, cfg.JWTExpiry)
+
+	authSvc := service.NewAuthService(
+		userRepo,
+		b,
+		cfg.JWTSecret,
+		cfg.JWTExpiry,
+	)
+
 	authHandler := handler.NewAuthHandler(authSvc)
 
+	// Configure Gin.
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.New()
-
-	// Register tracing before application middleware.
 	router.Use(
 		otelgin.Middleware(cfg.ServiceName),
 		gin.Recovery(),
@@ -94,6 +125,7 @@ func main() {
 		middleware.Metrics(cfg.ServiceName),
 	)
 
+	// Liveness probe.
 	router.GET("/healthz", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "ok",
@@ -101,8 +133,15 @@ func main() {
 		})
 	})
 
+	// Readiness probe.
 	router.GET("/readyz", func(c *gin.Context) {
-		if err := pool.Ping(c.Request.Context()); err != nil {
+		rctx, cancel := context.WithTimeout(
+			c.Request.Context(),
+			2*time.Second,
+		)
+		defer cancel()
+
+		if err := pool.Ping(rctx); err != nil {
 			c.JSON(http.StatusServiceUnavailable, gin.H{
 				"status": "not ready",
 				"error":  err.Error(),
@@ -116,28 +155,32 @@ func main() {
 		})
 	})
 
+	// Prometheus metrics endpoint.
 	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
+	// Register authentication API routes.
 	authHandler.Register(router, cfg.JWTSecret)
 
+	// Configure HTTP server.
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
 		Handler:           router,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	// Start HTTP server.
-	serverErrors := make(chan error, 1)
+	serverErr := make(chan error, 1)
 
+	// Start HTTP server.
 	go func() {
-		logger.Info("server starting",
+		logger.Info(
+			"server starting",
 			"service", cfg.ServiceName,
 			"port", cfg.Port,
 		)
 
 		if err := srv.ListenAndServe(); err != nil &&
 			!errors.Is(err, http.ErrServerClosed) {
-			serverErrors <- err
+			serverErr <- err
 		}
 	}()
 
@@ -148,12 +191,14 @@ func main() {
 
 	select {
 	case sig := <-quit:
-		logger.Info("shutdown signal received", "signal", sig.String())
-	case err := <-serverErrors:
-		logger.Error("server failed", "error", err)
-	}
+		logger.Info(
+			"shutdown signal received",
+			"signal", sig.String(),
+		)
 
-	logger.Info("server shutting down", "service", cfg.ServiceName)
+	case err := <-serverErr:
+		return fmt.Errorf("HTTP server failed: %w", err)
+	}
 
 	// Gracefully shut down HTTP server.
 	shutdownCtx, cancel := context.WithTimeout(
@@ -163,23 +208,11 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("HTTP server shutdown failed", "error", err)
-	}
-
-	// Close NATS and PostgreSQL.
-	b.Close()
-	pool.Close()
-
-	// Flush and shut down OpenTelemetry last.
-	tracingCtx, tracingCancel := context.WithTimeout(
-		context.Background(),
-		10*time.Second,
-	)
-	defer tracingCancel()
-
-	if err := shutdownTracing(tracingCtx); err != nil {
-		logger.Error("tracing shutdown failed", "error", err)
+		_ = srv.Close()
+		return fmt.Errorf("HTTP server shutdown failed: %w", err)
 	}
 
 	logger.Info("server stopped", "service", cfg.ServiceName)
+
+	return nil
 }
