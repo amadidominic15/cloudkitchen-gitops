@@ -11,11 +11,11 @@ flowchart TB
     user([Browser / Mobile])
 
     subgraph edge["Edge - AWS EKS"]
-      lb["AWS Load Balancer"]
+      lb["cloudflared"]
       envoy["Envoy Gateway / Envoy Proxy"] 
       gw["Gateway API - Gateway"] 
       routes["HTTPRoute Resources"] 
-      lb --> envoy --> gw --> routes
+      cloudflared --> envoy --> gw --> routes
     end
 
     fe[React Frontend]

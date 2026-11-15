@@ -16,3 +16,5 @@ data:
   DB_SSLMODE: {{ .Values.db.sslmode | quote }}
   REDIS_ADDR: "{{ .Values.redis.servicename }}:{{ .Values.redis.port }}"
   RESTAURANT_SERVICE_URL: "http://{{ .Values.restaurantService.servicename }}:{{ .Values.restaurantService.port }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.otel.endpoint | quote }}
+  OTEL_EXPORTER_OTLP_INSECURE: {{ .Values.otel.insecure | quote }}

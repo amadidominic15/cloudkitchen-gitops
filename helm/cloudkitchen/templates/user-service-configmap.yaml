@@ -15,3 +15,5 @@ data:
   DB_SCHEMA: "users"
   DB_SSLMODE: {{ .Values.db.sslmode | quote }}
   REDIS_ADDR: "{{ .Values.redis.servicename }}:{{ .Values.redis.port }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.otel.endpoint | quote }}
+  OTEL_EXPORTER_OTLP_INSECURE: {{ .Values.otel.insecure | quote }}

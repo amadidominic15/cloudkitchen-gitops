@@ -13,6 +13,8 @@ kind: PrometheusRule
 metadata:
   name: cloudkitchen-app-rules
   namespace: observability
+  labels:
+    release: kube-prometheus-stack
 spec:
   groups:
     # -------------------------------------------------------------------------

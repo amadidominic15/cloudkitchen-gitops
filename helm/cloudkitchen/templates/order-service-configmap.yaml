@@ -17,3 +17,5 @@ data:
   REDIS_ADDR: "{{ .Values.redis.servicename }}:{{ .Values.redis.port }}"
   MENU_SERVICE_URL: "http://{{ .Values.menuService.servicename }}:{{ .Values.menuService.port }}"
   RESTAURANT_SERVICE_URL: "http://{{ .Values.restaurantService.servicename }}:{{ .Values.restaurantService.port }}"
+  OTEL_EXPORTER_OTLP_ENDPOINT: {{ .Values.otel.endpoint | quote }}
+  OTEL_EXPORTER_OTLP_INSECURE: {{ .Values.otel.insecure | quote }}

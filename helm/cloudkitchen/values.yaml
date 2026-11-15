@@ -164,6 +164,10 @@ gateway:
   name: public-gateway
   namespace: envoy-gateway-system
   host: cloudkitchen.dglobaleng.com.ng
+otel:
+  enabled: true
+  endpoint: "tempo.observability.svc.cluster.local:4317"
+  insecure: "true"
 # -----------------------------------------------------------------------------
 # Observability IngressRoutes + ServiceMonitor are NOT in this chart.
 # They're applied as plain YAML via kubectl apply — see docs/gcp/06 Steps 5+6.

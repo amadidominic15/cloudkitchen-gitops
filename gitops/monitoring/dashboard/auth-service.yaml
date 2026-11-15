@@ -1,47 +1,49 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboard-auth-service
-  namespace: monitoring
+  name: grafana-dashboard-auth_service
+  namespace: observability
   labels:
-    grafana_dashboard: "1"
-    app.kubernetes.io/part-of: "cloudkitchen-dashboards"
+    grafana_dashboard: '1'
+    app.kubernetes.io/part-of: cloudkitchen
 data:
-  auth-service.json: |
+  auth_service.json: |-
     {
-      "annotations": {
-        "list": []
+      "id": null,
+      "uid": "auth_service",
+      "title": "Auth Service Dashboard",
+      "tags": [
+        "cloudkitchen",
+        "microservices"
+      ],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": {
+        "from": "now-1h",
+        "to": "now"
       },
+      "timepicker": {},
       "editable": true,
-      "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
-      "links": [],
+      "fiscalYearStartMonth": 0,
       "liveNow": false,
       "panels": [
         {
           "id": 1,
+          "title": "Requests per second",
           "type": "stat",
-          "title": "Requests / sec",
-          "gridPos": {
-            "h": 4,
-            "w": 6,
-            "x": 0,
-            "y": 0
-          },
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{service=\"auth-service\"}[5m]))",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 0,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
@@ -56,12 +58,8 @@ data:
                     "value": null
                   },
                   {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
                     "color": "red",
-                    "value": 5
+                    "value": 1
                   }
                 ]
               }
@@ -80,32 +78,35 @@ data:
               "fields": "",
               "values": false
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(http_requests_total{service=\"auth-service\"}[5m]))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
           "id": 2,
+          "title": "5xx Error rate",
           "type": "stat",
-          "title": "Error rate (5xx)",
-          "gridPos": {
-            "h": 4,
-            "w": 6,
-            "x": 6,
-            "y": 0
-          },
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [
-            {
-              "expr": "sum(rate(http_requests_total{service=\"auth-service\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total{service=\"auth-service\"}[5m])), 1e-9)",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 6,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "percentunit",
@@ -120,12 +121,8 @@ data:
                     "value": null
                   },
                   {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
                     "color": "red",
-                    "value": 5
+                    "value": 1
                   }
                 ]
               }
@@ -144,32 +141,35 @@ data:
               "fields": "",
               "values": false
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(rate(http_requests_total{service=\"auth-service\",status=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total{service=\"auth-service\"}[5m])), 1e-9)",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
           "id": 3,
+          "title": "P95 Request Latency",
           "type": "stat",
-          "title": "p95 latency",
-          "gridPos": {
-            "h": 4,
-            "w": 6,
-            "x": 12,
-            "y": 0
-          },
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
+          "gridPos": {
+            "h": 5,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "s",
@@ -184,12 +184,8 @@ data:
                     "value": null
                   },
                   {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
                     "color": "red",
-                    "value": 5
+                    "value": 1
                   }
                 ]
               }
@@ -208,32 +204,35 @@ data:
               "fields": "",
               "values": false
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
           "id": 4,
+          "title": "Total Requests",
           "type": "stat",
-          "title": "Pods up",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
-            "h": 4,
+            "h": 5,
             "w": 6,
             "x": 18,
             "y": 0
           },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "expr": "count(up{service=\"auth-service\"} == 1)",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
           "fieldConfig": {
             "defaults": {
               "unit": "short",
@@ -248,12 +247,8 @@ data:
                     "value": null
                   },
                   {
-                    "color": "yellow",
-                    "value": 1
-                  },
-                  {
                     "color": "red",
-                    "value": 5
+                    "value": 1
                   }
                 ]
               }
@@ -272,41 +267,49 @@ data:
               "fields": "",
               "values": false
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum(increase(http_requests_total{service=\"auth-service\"}[$__range]))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
           "id": 5,
+          "title": "Request Rate by HTTP Status",
           "type": "timeseries",
-          "title": "Requests / sec  by status",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 4
-          },
+          "description": "",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [
-            {
-              "expr": "sum by (status) (rate(http_requests_total{service=\"auth-service\"}[5m]))",
-              "legendFormat": "{{status}}",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 16
+          },
           "fieldConfig": {
             "defaults": {
               "unit": "reqps",
+              "color": {
+                "mode": "palette-classic"
+              },
               "custom": {
                 "drawStyle": "line",
-                "lineWidth": 1,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
                 "fillOpacity": 10,
-                "showPoints": "never"
+                "showPoints": "never",
+                "spanNulls": false
               }
             },
             "overrides": []
@@ -315,116 +318,55 @@ data:
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true,
-              "calcs": []
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by (status) (rate(http_requests_total{service=\"auth-service\"}[5m]))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
           "id": 6,
+          "title": "Request Latency - P50, P95 and P99",
           "type": "timeseries",
-          "title": "Requests / sec  by path",
+          "description": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 4
+            "y": 16
           },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "expr": "topk(5, sum by (path) (rate(http_requests_total{service=\"auth-service\"}[5m])))",
-              "legendFormat": "{{path}}",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
-          "fieldConfig": {
-            "defaults": {
-              "unit": "reqps",
-              "custom": {
-                "drawStyle": "line",
-                "lineWidth": 1,
-                "fillOpacity": 10,
-                "showPoints": "never"
-              }
-            },
-            "overrides": []
-          },
-          "options": {
-            "legend": {
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true,
-              "calcs": []
-            },
-            "tooltip": {
-              "mode": "multi",
-              "sort": "desc"
-            }
-          }
-        },
-        {
-          "id": 7,
-          "type": "timeseries",
-          "title": "HTTP latency  (p50 / p95 / p99)",
-          "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 12
-          },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
-              "legendFormat": "p50",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            },
-            {
-              "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
-              "legendFormat": "p95",
-              "refId": "B",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            },
-            {
-              "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
-              "legendFormat": "p99",
-              "refId": "C",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
           "fieldConfig": {
             "defaults": {
               "unit": "s",
+              "color": {
+                "mode": "palette-classic"
+              },
               "custom": {
                 "drawStyle": "line",
-                "lineWidth": 1,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
                 "fillOpacity": 10,
-                "showPoints": "never"
+                "showPoints": "never",
+                "spanNulls": false
               }
             },
             "overrides": []
@@ -433,48 +375,55 @@ data:
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true,
-              "calcs": []
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"auth-service\"}[5m])))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
-          "id": 8,
+          "id": 7,
+          "title": "CPU Usage by Pod",
           "type": "timeseries",
-          "title": "CPU usage  (cores, per pod)",
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 20
-          },
+          "description": "",
           "datasource": {
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "targets": [
-            {
-              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"cloudkitchen\",pod=~\"auth-service.*\",container!=\"\",container!=\"POD\"}[5m]))",
-              "legendFormat": "{{pod}}",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 24
+          },
           "fieldConfig": {
             "defaults": {
-              "unit": "short",
+              "unit": "cores",
+              "color": {
+                "mode": "palette-classic"
+              },
               "custom": {
                 "drawStyle": "line",
-                "lineWidth": 1,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
                 "fillOpacity": 10,
-                "showPoints": "never"
+                "showPoints": "never",
+                "spanNulls": false
               }
             },
             "overrides": []
@@ -483,48 +432,55 @@ data:
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true,
-              "calcs": []
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"cloudkitchen\",pod=~\"auth-service.*\",container!=\"\",container!=\"POD\"}[5m]))",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
-          "id": 9,
+          "id": 8,
+          "title": "Memory Usage by Pod",
           "type": "timeseries",
-          "title": "Memory  (MiB, per pod)",
+          "description": "",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
           "gridPos": {
             "h": 8,
             "w": 12,
             "x": 12,
-            "y": 20
+            "y": 24
           },
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "targets": [
-            {
-              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"cloudkitchen\",pod=~\"auth-service.*\",container!=\"\",container!=\"POD\"}) / 1024 / 1024",
-              "legendFormat": "{{pod}}",
-              "refId": "A",
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              }
-            }
-          ],
           "fieldConfig": {
             "defaults": {
-              "unit": "decmbytes",
+              "unit": "bytes",
+              "color": {
+                "mode": "palette-classic"
+              },
               "custom": {
                 "drawStyle": "line",
-                "lineWidth": 1,
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
                 "fillOpacity": 10,
-                "showPoints": "never"
+                "showPoints": "never",
+                "spanNulls": false
               }
             },
             "overrides": []
@@ -533,63 +489,61 @@ data:
             "legend": {
               "displayMode": "list",
               "placement": "bottom",
-              "showLegend": true,
-              "calcs": []
+              "showLegend": true
             },
             "tooltip": {
               "mode": "multi",
               "sort": "desc"
             }
-          }
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=\"cloudkitchen\",pod=~\"auth-service.*\",container!=\"\",container!=\"POD\"})",
+              "legendFormat": "{{service}}",
+              "range": true,
+              "refId": "A"
+            }
+          ]
         },
         {
-          "id": 10,
+          "id": 9,
+          "title": "Application Logs",
           "type": "logs",
-          "title": "Logs  (Loki)",
-          "gridPos": {
-            "h": 10,
-            "w": 24,
-            "x": 0,
-            "y": 28
-          },
           "datasource": {
             "type": "loki",
             "uid": "loki"
           },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 24
+          },
+          "options": {
+            "showTime": true,
+            "showLabels": true,
+            "showCommonLabels": false,
+            "wrapLogMessage": true,
+            "sortOrder": "Descending",
+            "dedupStrategy": "none"
+          },
           "targets": [
             {
-              "expr": "{namespace=\"cloudkitchen\", app=\"auth-service\"}",
-              "refId": "A",
               "datasource": {
                 "type": "loki",
                 "uid": "loki"
-              }
+              },
+              "editorMode": "code",
+              "expr": "{namespace=\"cloudkitchen\", service=\"auth-service\"}",
+              "queryType": "range",
+              "refId": "A"
             }
-          ],
-          "options": {
-            "showTime": true,
-            "showLabels": false,
-            "showCommonLabels": false,
-            "wrapLogMessage": false,
-            "prettifyLogMessage": false,
-            "enableLogDetails": true,
-            "dedupStrategy": "none",
-            "sortOrder": "Descending"
-          }
+          ]
         }
-      ],
-      "refresh": "30s",
-      "schemaVersion": 39,
-      "tags": [
-        "cloudkitchen",
-        "auth-service"
-      ],
-      "time": {
-        "from": "now-1h",
-        "to": "now"
-      },
-      "title": "CloudKitchen / auth-service",
-      "uid": "ck-auth-service",
-      "version": 1,
-      "weekStart": ""
+      ]
     }
