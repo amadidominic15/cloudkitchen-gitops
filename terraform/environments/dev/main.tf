@@ -36,7 +36,14 @@ module "eks" {
   node_security_group_id      = module.security_group.eks_nodes_security_group_id
   admin_principal_arns        = var.admin_principal_arns
   enable_pod_identity         = true
-  pod_identity_role_arns      = module.iam.pod_identity_role_arns
+  pod_identity_role_arns      = merge(module.iam.pod_identity_role_arns, module.iam.application_secrets_role_arns)
+  application_secrets_pod_identity = {
+    for name, config in local.application_secrets :
+    name => {
+      namespace       = config.namespace
+      service_account = config.service_account
+    }
+  }
   addons = {
     coredns                         = {}
     kube-proxy                      = {}

@@ -4,7 +4,7 @@ locals {
   application_secrets = {
     app = {
       namespace       = "cloudkitchen"
-      service_account = "cloudkitchen-sa"
+      service_account = "cloudkitchen-sa" 
       secret_arns = [
         module.secrets_manager.secret_arns["dev/cloudkitchen/application"]
       ]
