@@ -181,6 +181,6 @@ secrets:
   #dbUser: cloudkitchen
   #dbPassword: cloudkitchen-dev-password
   #jwtSecret: changeme-use-a-strong-secret-in-production
-  jwtExpiry: 24h
+  #jwtExpiry: 24h
   secretProviderClass: cloudkitchen-secrets
   #redisPassword: ""

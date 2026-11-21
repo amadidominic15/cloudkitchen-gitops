@@ -1,3 +1,83 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: {{ .Values.paymentService.deploymentname }}
+#   namespace: {{ .Values.namespace }}
+#   labels:
+#     app: payment-service
+# spec:
+#   replicas: {{ .Values.paymentService.replicas }}
+#   selector:
+#     matchLabels:
+#       app: payment-service
+#   template:
+#     metadata:
+#       labels:
+#         app: payment-service
+#       annotations:
+#         prometheus.io/scrape: "true"
+#         prometheus.io/port: "{{ .Values.paymentService.port }}"
+#         prometheus.io/path: "/metrics"
+#     spec:
+#       serviceAccountName: {{ .Values.serviceAccount.name }}
+#       securityContext:
+#         runAsNonRoot: true
+#         runAsUser: 65532
+#         fsGroup: 65532
+#       containers:
+#       - name: payment-service
+#         image: {{ .Values.paymentService.image.repository }}:{{ .Values.paymentService.image.tag }}
+#         imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+#         securityContext:
+#           allowPrivilegeEscalation: false
+#           capabilities:
+#             drop:
+#             - ALL
+#         ports:
+#         - name: http
+#           containerPort: {{ .Values.paymentService.port }}
+#         resources:
+#           requests:
+#             cpu: 100m
+#             memory: 128Mi
+#           limits:
+#             cpu: 500m
+#             memory: 512Mi
+#         livenessProbe:
+#           httpGet:
+#             path: /healthz
+#             port: {{ .Values.paymentService.port }}
+#           initialDelaySeconds: 20
+#           periodSeconds: 10
+#           timeoutSeconds: 5
+#           failureThreshold: 3
+#         readinessProbe:
+#           httpGet:
+#             path: /readyz
+#             port: {{ .Values.paymentService.port }}
+#           initialDelaySeconds: 10
+#           periodSeconds: 5
+#           timeoutSeconds: 3
+#           failureThreshold: 3
+#         envFrom:
+#         - configMapRef:
+#             name: payment-service-config
+#         - secretRef:
+#             name: cloudkitchen-app-secrets
+#         volumeMounts:
+#         - name: secrets-store
+#           mountPath: "/mnt/secrets-store"
+#           readOnly: true
+#       volumes:
+#       - name: secrets-store
+#         csi:
+#           driver: secrets-store.csi.k8s.io
+#           readOnly: true
+#           volumeAttributes:
+#             secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
+
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,15 +99,14 @@ spec:
         prometheus.io/port: "{{ .Values.paymentService.port }}"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: {{ .Values.serviceAccount.name }}
       securityContext:
         runAsNonRoot: true
         runAsUser: 65532
         fsGroup: 65532
       containers:
       - name: payment-service
-        image: {{ .Values.paymentService.image.repository }}:{{ .Values.paymentService.image.tag }}
-        imagePullPolicy: {{ .Values.imagePullPolicy | default "IfNotPresent" }}
+        image: {{ .Values.paymentService.image }}
+        imagePullPolicy: Always
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -63,16 +142,4 @@ spec:
         - configMapRef:
             name: payment-service-config
         - secretRef:
-            name: cloudkitchen-app-secrets
-        volumeMounts:
-        - name: secrets-store
-          mountPath: "/mnt/secrets-store"
-          readOnly: true
-      volumes:
-      - name: secrets-store
-        csi:
-          driver: secrets-store.csi.k8s.io
-          readOnly: true
-          volumeAttributes:
-            secretProviderClass: {{ .Values.secrets.secretProviderClass | quote}}
-
+            name: payment-service-secret
